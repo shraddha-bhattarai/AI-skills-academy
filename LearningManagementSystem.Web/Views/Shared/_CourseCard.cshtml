@@ -1,0 +1,28 @@
+@model CourseDto
+<article class="course-card lms-hover-lift">
+    <div class="course-img">
+        @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+        {
+            <img src="@Model.ThumbnailUrl" alt="" loading="lazy" />
+        }
+        else
+        {
+            <div class="course-img-fallback" aria-hidden="true"><span>AI</span><span>Learn by doing</span></div>
+        }
+        <span class="course-badge">@Model.CategoryName</span>
+    </div>
+    <div class="course-body">
+        <h3 class="course-title">
+            <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Id" class="text-decoration-none text-dark">@Model.Title</a>
+        </h3>
+        <div class="course-meta">
+            <span><i class="bi bi-bar-chart-steps"></i> @Model.Level</span>
+            <span><i class="bi bi-collection-play"></i> @Model.LessonCount lesson@(Model.LessonCount == 1 ? "" : "s")</span>
+            <span><i class="bi bi-people"></i> @Model.EnrollmentCount.ToString("N0") enrolled</span>
+        </div>
+        <div class="course-footer">
+            <div class="course-price">@(Model.Price == 0 ? "Free" : Model.Price.ToString("C"))</div>
+            <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.Id" class="btn-enroll btn-ripple">View Course</a>
+        </div>
+    </div>
+</article>

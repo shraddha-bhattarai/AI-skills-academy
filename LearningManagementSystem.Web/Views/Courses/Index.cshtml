@@ -1,0 +1,399 @@
+@model PagedResult<CourseDto>
+@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Courses";
+    var search = ViewBag.Search as string;
+    var categoryId = ViewBag.CategoryId as int?;
+    var level = ViewBag.Level as int?;
+    var categories = ViewBag.CategoryList as IReadOnlyList<LookupItemDto> ?? new List<LookupItemDto>();
+}
+
+<style>
+
+    .page-hero {
+        background: linear-gradient(135deg, #5624d0 0%, #7c3aed 60%, #6d28d9 100%);
+        padding: 3.5rem 0 2.5rem;
+        color: #fff;
+    }
+
+        .page-hero .breadcrumb-trail {
+            font-size: .9rem;
+            opacity: .85;
+            margin-bottom: .75rem;
+        }
+
+            .page-hero .breadcrumb-trail a {
+                color: #fff;
+                text-decoration: none;
+                opacity: .9;
+            }
+
+                .page-hero .breadcrumb-trail a:hover {
+                    text-decoration: underline;
+                }
+
+        .page-hero h1 {
+            font-weight: 700;
+            font-size: 2.4rem;
+            margin-bottom: .5rem;
+        }
+
+        .page-hero p {
+            opacity: .9;
+            max-width: 640px;
+            margin-bottom: 0;
+        }
+
+    .filters-sidebar {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 14px;
+        padding: 1.5rem;
+        position: sticky;
+        top: 90px;
+    }
+
+        .filters-sidebar h6 {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: .78rem;
+            letter-spacing: .04em;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+    .filter-group {
+        padding-bottom: 1.25rem;
+        margin-bottom: 1.25rem;
+        border-bottom: 1px solid rgba(0, 0, 0, .06);
+    }
+
+        .filter-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+    .filter-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: .35rem 0;
+        font-size: .92rem;
+        color: #374151;
+        cursor: pointer;
+    }
+
+        .filter-option .form-check-input:checked {
+            background-color: #5624d0;
+            border-color: #5624d0;
+        }
+
+        .filter-option.active-filter {
+            color: #5624d0;
+            font-weight: 600;
+        }
+
+    .btn-clear-filters {
+        font-size: .85rem;
+        color: #5624d0;
+        background: none;
+        border: none;
+        padding: 0;
+        text-decoration: underline;
+    }
+
+    .results-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: .75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .results-count {
+        font-size: .95rem;
+        color: #374151;
+    }
+
+        .results-count strong {
+            color: #111827;
+        }
+
+    .sort-select {
+        border: 1px solid rgba(0, 0, 0, .12);
+        border-radius: 10px;
+        padding: .55rem 1rem;
+        font-size: .9rem;
+        color: #374151;
+        background: #fff;
+    }
+
+    .level-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        font-size: .78rem;
+        font-weight: 600;
+        padding: .2rem .65rem;
+        border-radius: 999px;
+    }
+
+    .level-beginner {
+        background: rgba(67, 233, 123, .15);
+        color: #1a9c53;
+    }
+
+    .level-intermediate {
+        background: rgba(250, 173, 20, .15);
+        color: #b57c00;
+    }
+
+    .level-advanced {
+        background: rgba(245, 87, 108, .15);
+        color: #c93357;
+    }
+
+    .course-card .course-meta {
+        justify-content: flex-start;
+        gap: 1rem;
+    }
+
+    .course-desc {
+        font-size: .88rem;
+        color: #6b7280;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: .75rem;
+    }
+
+    .course-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: .4rem;
+        margin-top: 2.5rem;
+    }
+
+        .course-pagination a,
+        .course-pagination span {
+            min-width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #374151;
+            font-weight: 600;
+            font-size: .9rem;
+            border: 1px solid rgba(0, 0, 0, .08);
+        }
+
+            .course-pagination a:hover {
+                background: rgba(86, 36, 208, .08);
+                color: #5624d0;
+            }
+
+        .course-pagination .active {
+            background: linear-gradient(135deg, #5624d0, #7c3aed);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .course-pagination .disabled {
+            opacity: .4;
+            pointer-events: none;
+        }
+
+    @@media (max-width: 991px) {
+        .filters-sidebar {
+            position: static;
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    .btn-create-course {
+        background: linear-gradient(135deg, #5624d0, #7c3aed);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: .6rem 1.3rem;
+        font-weight: 600;
+        font-size: .9rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+    }
+
+        .btn-create-course:hover {
+            color: #fff;
+            opacity: .92;
+        }
+
+    .card-actions {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+        .card-actions a {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: .95rem;
+            border: 1px solid rgba(0, 0, 0, .08);
+        }
+
+        .card-actions .action-details {
+            color: #5624d0;
+            border-color: rgba(86, 36, 208, .25);
+        }
+
+            .card-actions .action-details:hover {
+                background: rgba(86, 36, 208, .08);
+            }
+
+        .card-actions .action-edit {
+            color: #b57c00;
+            border-color: rgba(250, 173, 20, .3);
+        }
+
+            .card-actions .action-edit:hover {
+                background: rgba(250, 173, 20, .1);
+            }
+
+        .card-actions .action-delete {
+            color: #c93357;
+            border-color: rgba(245, 87, 108, .3);
+        }
+
+            .card-actions .action-delete:hover {
+                background: rgba(245, 87, 108, .1);
+            }
+</style>
+
+<partial name="_Navbar" />
+
+<section class="page-hero">
+    <div class="container">
+        <div class="breadcrumb-trail">
+            <a asp-area="" asp-controller="Home" asp-action="Index">Home</a> / <span>Courses</span>
+        </div>
+        <h1>Explore Our Courses</h1>
+        <p>Find an AI course that fits your level and goals.</p>
+    </div>
+</section>
+
+<section class="search-section">
+    <div class="container">
+        <form class="search-box" id="courseSearchForm" method="get" asp-area="" asp-controller="Courses" asp-action="Index" role="search">
+            <input type="search" id="searchQuery" name="search" value="@search" placeholder="Search courses" aria-label="Search courses" />
+            <button type="submit" class="btn-search">
+                <i class="bi bi-search me-2"></i>Search
+            </button>
+        </form>
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Filters sidebar -->
+            <div class="col-lg-3">
+                <aside class="filters-sidebar">
+                    <form method="get" asp-controller="Courses" asp-action="Index">
+                        <input type="hidden" name="search" value="@search" />
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h6 class="mb-0">Filters</h6>
+                            <a asp-controller="Courses" asp-action="Index" class="btn-clear-filters">Clear all</a>
+                        </div>
+
+                        <div class="filter-group">
+                            <h6>Category</h6>
+                            <label class="filter-option @(categoryId == null ? "active-filter" : "")">
+                                <span><input class="form-check-input me-2" type="radio" name="categoryId" value="" checked="@(categoryId == null)" onchange="this.form.submit()" /> All Categories</span>
+                            </label>
+                            @foreach (var cat in categories)
+                            {
+                                <label class="filter-option @(categoryId?.ToString() == cat.Id ? "active-filter" : "")">
+                                    <span><input class="form-check-input me-2" type="radio" name="categoryId" value="@cat.Id" checked="@(categoryId?.ToString() == cat.Id)" onchange="this.form.submit()" /> @cat.Name</span>
+                                </label>
+                            }
+                        </div>
+
+                        <div class="filter-group">
+                            <h6>Level</h6>
+                            <label class="filter-option @(level == null ? "active-filter" : "")">
+                                <span><input class="form-check-input me-2" type="radio" name="level" value="" checked="@(level == null)" onchange="this.form.submit()" /> All Levels</span>
+                            </label>
+                            <label class="filter-option @(level == 1 ? "active-filter" : "")">
+                                <span><input class="form-check-input me-2" type="radio" name="level" value="1" checked="@(level == 1)" onchange="this.form.submit()" /> Beginner</span>
+                            </label>
+                            <label class="filter-option @(level == 2 ? "active-filter" : "")">
+                                <span><input class="form-check-input me-2" type="radio" name="level" value="2" checked="@(level == 2)" onchange="this.form.submit()" /> Intermediate</span>
+                            </label>
+                            <label class="filter-option @(level == 3 ? "active-filter" : "")">
+                                <span><input class="form-check-input me-2" type="radio" name="level" value="3" checked="@(level == 3)" onchange="this.form.submit()" /> Advanced</span>
+                            </label>
+                        </div>
+                    </form>
+                </aside>
+            </div>
+
+            <!-- Course results -->
+            <div class="col-lg-9">
+                <div class="results-bar">
+                    <div class="results-count">
+                        <strong>@Model.TotalCount</strong> course@(Model.TotalCount == 1 ? "" : "s") found
+                    </div>
+                </div>
+
+                @if (!Model.Items.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-collection" style="font-size: 3rem;"></i>
+                        <p class="mt-3">No courses match your search or filters.</p>
+                        <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-primary-custom">Clear filters</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var c in Model.Items)
+                        {
+                            <div class="col-md-6 col-xl-4">
+                                <partial name="_CourseCard" model="c" />
+                            </div>
+                        }
+                    </div>
+
+                    <partial name="_Pagination" model="Model" />
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="cta-section">
+            <h2>Can't find what you're looking for?</h2>
+            <p>Browse the current topics or check back when new lessons are published.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a asp-area="" asp-controller="Account" asp-action="Register" class="btn-white">Register</a>
+                <a asp-area="" asp-controller="Categories" asp-action="Index" class="btn-outline-white">Browse Categories</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<partial name="_Footer" />

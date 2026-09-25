@@ -1,0 +1,254 @@
+@model PagedResult<CategoryDto>
+@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Categories";
+
+    string[] categoryIcons = { "bi-code-slash", "bi-briefcase", "bi-palette", "bi-megaphone", "bi-camera", "bi-graph-up-arrow", "bi-mortarboard", "bi-lightbulb" };
+    string[] categoryGradients = {
+        "linear-gradient(135deg, #667eea, #764ba2)", "linear-gradient(135deg, #f6d365, #fda085)",
+        "linear-gradient(135deg, #f093fb, #f5576c)", "linear-gradient(135deg, #4facfe, #00f2fe)",
+        "linear-gradient(135deg, #43e97b, #38f9d7)", "linear-gradient(135deg, #5624d0, #7c3aed)"
+    };
+}
+
+<style>
+    .page-hero {
+        background: linear-gradient(135deg, #5624d0 0%, #7c3aed 60%, #6d28d9 100%);
+        padding: 3.5rem 0 2.5rem;
+        color: #fff;
+    }
+
+        .page-hero .breadcrumb-trail {
+            font-size: .9rem;
+            opacity: .85;
+            margin-bottom: .75rem;
+        }
+
+            .page-hero .breadcrumb-trail a {
+                color: #fff;
+                text-decoration: none;
+                opacity: .9;
+            }
+
+                .page-hero .breadcrumb-trail a:hover {
+                    text-decoration: underline;
+                }
+
+        .page-hero h1 {
+            font-weight: 700;
+            font-size: 2.4rem;
+            margin-bottom: .5rem;
+        }
+
+        .page-hero p {
+            opacity: .9;
+            max-width: 640px;
+            margin-bottom: 0;
+        }
+
+    .category-detail-card {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, .07);
+        border-radius: 16px;
+        padding: 1.75rem;
+        height: 100%;
+        transition: transform .2s ease, box-shadow .2s ease;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+    }
+
+        .category-detail-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, .08);
+            color: inherit;
+        }
+
+        .category-detail-card .cat-icon-wrap {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .category-detail-card h5 {
+            font-weight: 700;
+            margin-bottom: .4rem;
+        }
+
+        .category-detail-card p {
+            color: #6b7280;
+            font-size: .9rem;
+            margin-bottom: 1rem;
+        }
+
+        .category-detail-card .cat-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: .85rem;
+            color: #6b7280;
+            border-top: 1px solid rgba(0, 0, 0, .06);
+            padding-top: .9rem;
+        }
+
+            .category-detail-card .cat-meta strong {
+                color: #111827;
+            }
+
+        .category-detail-card .cat-explore {
+            color: #5624d0;
+            font-weight: 600;
+        }
+
+    .btn-create-category {
+        background: linear-gradient(135deg, #5624d0, #7c3aed);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: .6rem 1.3rem;
+        font-weight: 600;
+        font-size: .9rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+    }
+
+        .btn-create-category:hover {
+            color: #fff;
+            opacity: .92;
+        }
+
+    .cat-card-actions {
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+    }
+
+        .cat-card-actions a {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: .85rem;
+            border: 1px solid rgba(0, 0, 0, .08);
+        }
+
+        .cat-card-actions .action-details {
+            color: #5624d0;
+            border-color: rgba(86, 36, 208, .25);
+        }
+
+            .cat-card-actions .action-details:hover {
+                background: rgba(86, 36, 208, .08);
+            }
+
+        .cat-card-actions .action-edit {
+            color: #b57c00;
+            border-color: rgba(250, 173, 20, .3);
+        }
+
+            .cat-card-actions .action-edit:hover {
+                background: rgba(250, 173, 20, .1);
+            }
+
+        .cat-card-actions .action-delete {
+            color: #c93357;
+            border-color: rgba(245, 87, 108, .3);
+        }
+
+            .cat-card-actions .action-delete:hover {
+                background: rgba(245, 87, 108, .1);
+            }
+</style>
+
+<partial name="_Navbar" />
+
+<section class="page-hero">
+    <div class="container">
+        <div class="breadcrumb-trail">
+            <a asp-area="" asp-controller="Home" asp-action="Index">Home</a> / <span>Categories</span>
+        </div>
+        <h1>Browse by Category</h1>
+        <p>Find the right learning path for your goals — from hands-on programming to creative design, business strategy, and beyond.</p>
+    </div>
+</section>
+
+<section class="search-section">
+    <div class="container">
+        <form class="search-box" method="get" asp-controller="Categories" asp-action="Index" role="search">
+            <input type="search" name="search" value="@(ViewBag.Search as string)" placeholder="Search categories..." aria-label="Search categories" />
+            <button type="submit" class="btn-search">
+                <i class="bi bi-search me-2"></i>Search
+            </button>
+        </form>
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="section-header d-flex flex-wrap align-items-start justify-content-between gap-3">
+            <div>
+                <span class="section-label">All Categories</span>
+                <h2 class="section-title">Explore Every Skill Path</h2>
+                <p class="section-desc mb-0">Each category groups related courses together so you can find what to learn next.</p>
+            </div>
+        </div>
+
+        @if (!Model.Items.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-grid-3x3-gap" style="font-size: 3rem;"></i>
+                <p class="mt-3">No categories match your search.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @for (int i = 0; i < Model.Items.Count; i++)
+                {
+                    var cat = Model.Items[i];
+                    <div class="col-sm-6 col-lg-4">
+                        <a asp-controller="Categories" asp-action="Details" asp-route-id="@cat.Id" class="category-detail-card">
+                            <div class="cat-icon-wrap" style="background: @categoryGradients[i % categoryGradients.Length];">
+                                <i class="bi @categoryIcons[i % categoryIcons.Length]"></i>
+                            </div>
+                            <h5>@cat.Name</h5>
+                            <p>@(cat.Description ?? "Explore courses in this category.")</p>
+                            <div class="cat-meta">
+                                <span><strong>@cat.CourseCount</strong> course@(cat.CourseCount == 1 ? "" : "s")</span>
+                                <span class="cat-explore">Explore <i class="bi bi-arrow-right"></i></span>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+
+            <partial name="_Pagination" model="Model" />
+        }
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="cta-section">
+            <h2>Not sure where to start?</h2>
+            <p>Browse all courses across every category, or register free to get started.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a asp-area="" asp-controller="Courses" asp-action="Index" class="btn-white">Browse All Courses</a>
+                <a asp-area="" asp-controller="Account" asp-action="Register" class="btn-outline-white">Register</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<partial name="_Footer" />

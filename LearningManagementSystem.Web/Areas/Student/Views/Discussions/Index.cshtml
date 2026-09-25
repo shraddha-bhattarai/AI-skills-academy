@@ -1,0 +1,76 @@
+@model IReadOnlyList<LearningManagementSystem.Application.DTOs.Discussions.DiscussionDto>
+@{
+    ViewData["Title"] = "Discussions - " + ViewBag.CourseTitle;
+    Layout = "_StudentLayout";
+    int courseId = ViewBag.CourseId;
+}
+
+<style>
+    .discussion-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        margin-bottom: 2rem;
+    }
+    .discussion-card {
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        text-decoration: none;
+        display: block;
+        color: inherit;
+        transition: all 0.2s ease;
+    }
+    .discussion-card:hover {
+        box-shadow: 0 4px 20px rgba(86, 36, 208, 0.12);
+        color: inherit;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-area="Student" asp-controller="Lessons" asp-action="Index" asp-route-courseId="@courseId" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Course
+        </a>
+    </div>
+
+    <div class="discussion-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-1"><i class="bi bi-chat-left-text me-2 text-primary"></i>Discussions</h2>
+            <p class="text-muted mb-0">@ViewBag.CourseTitle</p>
+        </div>
+        <a asp-area="Student" asp-controller="Discussions" asp-action="Create" asp-route-courseId="@courseId" class="btn btn-primary rounded-pill px-4">
+            <i class="bi bi-plus-lg me-1"></i> New Discussion
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-chat-square-text" style="font-size: 3rem;"></i>
+            <p class="mt-3">No discussions yet. Be the first to start one!</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var d in Model)
+        {
+            <a asp-area="Student" asp-controller="Discussions" asp-action="Details" asp-route-id="@d.Id" class="discussion-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">@d.Title</h5>
+                        <p class="text-muted mb-1 small">by @d.StudentName &middot; @d.CreatedAt.ToString("MMM dd, yyyy")</p>
+                    </div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
+                        <i class="bi bi-reply me-1"></i>@d.ReplyCount
+                    </span>
+                </div>
+            </a>
+        }
+    }
+</div>

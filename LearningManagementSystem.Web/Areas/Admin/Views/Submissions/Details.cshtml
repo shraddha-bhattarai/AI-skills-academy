@@ -1,0 +1,162 @@
+@model SubmissionDto
+@{
+    ViewData["Title"] = "Review Submission";
+}
+
+@section Styles {
+<style>
+    .details-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c1d95 100%);
+        border-radius: var(--lms-radius, 16px);
+        padding: 2.25rem 2rem;
+        color: #fff;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .details-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        padding: 2rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    .meta-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid #edf2f7;
+    }
+    .meta-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--lms-muted, #6a6f73);
+        margin-bottom: 0.25rem;
+    }
+    .meta-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--lms-dark, #1c1d1f);
+    }
+</style>
+}
+
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.85rem;">
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Dashboard</a></li>
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Submissions" asp-action="Index" class="text-decoration-none text-muted">Submissions</a></li>
+            <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">Submission #@Model.Id</li>
+        </ol>
+    </nav>
+
+    <div class="details-hero">
+        <span class="badge rounded-pill bg-white text-dark px-3 py-1 fw-bold mb-2" style="font-size: 0.75rem;">
+            <i class="bi bi-file-earmark-check-fill text-primary me-1"></i> @Model.Status
+        </span>
+        <h1 class="fw-bold mb-1">@Model.AssignmentTitle</h1>
+        <p class="opacity-75 mb-0">Submitted by @Model.StudentName on @Model.CreatedAt.ToString("MMMM d, yyyy hh:mm tt")</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="details-card mb-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-person-badge-fill text-primary me-2"></i>Submission Information</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="meta-box">
+                            <div class="meta-label">Student</div>
+                            <div class="meta-value">@Model.StudentName</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="meta-box">
+                            <div class="meta-label">Assignment</div>
+                            <div class="meta-value">@Model.AssignmentTitle</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="meta-box">
+                            <div class="meta-label">Submitted At</div>
+                            <div class="meta-value">@Model.CreatedAt.ToString("MMM d, yyyy hh:mm tt")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="meta-box">
+                            <div class="meta-label">Current Marks</div>
+                            <div class="meta-value">@(Model.Marks?.ToString() ?? "Not graded")</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    @if (!string.IsNullOrWhiteSpace(Model.FilePath))
+                    {
+                        <a href="@Model.FilePath" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="bi bi-download me-1"></i> View Submitted File
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="text-muted fst-italic">No file was uploaded with this submission.</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Feedback))
+                {
+                    <div class="mt-4">
+                        <div class="meta-label mb-1">Current Feedback</div>
+                        <div class="meta-box">@Model.Feedback</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="details-card">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clipboard-check text-primary me-2"></i>Grade This Submission</h5>
+                <form asp-area="Admin" asp-controller="Submissions" asp-action="Grade" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" value="@Model.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Marks</label>
+                        <input type="number" step="0.01" min="0" max="1000" name="Marks" value="@Model.Marks" class="form-control" placeholder="e.g. 85" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Status</label>
+                        <select name="Status" class="form-select" asp-items="Html.GetEnumSelectList<SubmissionStatus>()" data-current="@Model.Status">
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Feedback</label>
+                        <textarea name="Feedback" class="form-control" rows="4" placeholder="Give the student feedback on their submission...">@Model.Feedback</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 fw-semibold" style="background: var(--lms-gradient); border: none; border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-check-lg me-1"></i> Save Grade
+                    </button>
+                </form>
+
+                <a asp-area="Admin" asp-controller="Submissions" asp-action="Index" class="btn btn-light w-100 text-muted fw-semibold mt-2" style="border-radius: 10px; padding: 0.65rem;">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Submissions
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Preselect the submission's current status in the Status dropdown.
+        document.addEventListener('DOMContentLoaded', function () {
+            var select = document.querySelector('select[name="Status"]');
+            if (select) {
+                select.value = select.getAttribute('data-current');
+            }
+        });
+    </script>
+}

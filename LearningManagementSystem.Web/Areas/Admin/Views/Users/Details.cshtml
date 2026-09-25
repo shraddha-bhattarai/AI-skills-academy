@@ -1,0 +1,100 @@
+@model LearningManagementSystem.Web.Areas.Admin.ViewModels.AdminUserDetailsViewModel
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container py-4">
+    <h1><i class="bi bi-person-badge me-2"></i>User Details</h1>
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@Model.FirstName @Model.LastName</dd>
+
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@Model.Email</dd>
+
+        <dt class="col-sm-3">Current Role(s)</dt>
+        <dd class="col-sm-9">
+            @foreach (var role in Model.Roles)
+            {
+                <span class="badge bg-primary bg-opacity-75 me-1">@role</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">Status</dt>
+        <dd class="col-sm-9">
+            @if (Model.IsActive)
+            {
+                <span class="badge bg-success">Active</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Deactivated</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">Joined</dt>
+        <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+    </dl>
+
+    @if (Model.IsLastActiveAdmin)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-shield-exclamation me-2"></i>
+            This is the last active Admin account. Their role cannot be changed and they cannot be deactivated until another user is promoted to Admin.
+        </div>
+    }
+
+    <div class="row g-4 mt-1">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-person-gear me-1"></i> Change Role</h5>
+                    <form asp-area="Admin" asp-controller="Users" asp-action="ChangeRole" method="post" class="d-flex gap-2 align-items-center mt-2">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <select name="newRole" class="form-select">
+                            @foreach (var role in Model.AvailableRoles)
+                            {
+                                <option value="@role" selected="@(Model.Roles.Contains(role))">@role</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary" @(Model.IsLastActiveAdmin ? "disabled" : "")>
+                            <i class="bi bi-check-lg"></i> Apply
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-toggle-on me-1"></i> Account Status</h5>
+                    <p class="text-muted small">A deactivated user cannot log in.</p>
+                    <form asp-area="Admin" asp-controller="Users" asp-action="ToggleActive" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        @if (Model.IsActive)
+                        {
+                            <button type="submit" class="btn btn-outline-danger" @(Model.IsLastActiveAdmin ? "disabled" : "")>
+                                <i class="bi bi-slash-circle me-1"></i> Deactivate User
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-outline-success">
+                                <i class="bi bi-check-circle me-1"></i> Reactivate User
+                            </button>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Users
+        </a>
+    </div>
+</div>

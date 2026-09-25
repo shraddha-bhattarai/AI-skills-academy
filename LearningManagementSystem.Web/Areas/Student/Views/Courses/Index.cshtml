@@ -1,0 +1,396 @@
+@model LearningManagementSystem.Web.Areas.Student.ViewModels.StudentCoursesViewModel
+@{
+    ViewData["Title"] = "My Courses";
+}
+
+<style>
+    .my-courses-page {
+        padding-top: calc(var(--lms-nav-height) + 1.5rem);
+        padding-bottom: 5rem;
+        background-color: var(--lms-light);
+        min-height: 100vh;
+    }
+
+    .courses-header-banner {
+        background: linear-gradient(135deg, #1a0533 0%, #2d1b69 40%, #5624d0 75%, #7c3aed 100%);
+        border-radius: var(--lms-radius);
+        padding: 2.5rem 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--lms-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .courses-header-banner::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 85% 15%, rgba(164, 53, 240, 0.35) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    /* Stat Cards */
+    .course-stat-card {
+        background: white;
+        border-radius: var(--lms-radius);
+        padding: 1.25rem 1.5rem;
+        box-shadow: var(--lms-shadow);
+        transition: var(--lms-transition);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .course-stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--lms-shadow-hover);
+    }
+
+    .course-stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: var(--lms-radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .course-stat-icon.total { background: linear-gradient(135deg, #5624d0, #7c3aed); }
+    .course-stat-icon.progress { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+    .course-stat-icon.completed { background: linear-gradient(135deg, #10b981, #059669); }
+    .course-stat-icon.avg { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+    /* Filter Pills & Toolbar */
+    .filter-bar {
+        background: white;
+        border-radius: var(--lms-radius);
+        padding: 1.25rem;
+        box-shadow: var(--lms-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        margin-bottom: 2rem;
+    }
+
+    .filter-btn {
+        border-radius: 50px;
+        padding: 0.45rem 1.25rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: var(--lms-transition);
+        border: 1px solid #e2e8f0;
+        color: var(--lms-dark);
+        background: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+        background: var(--lms-gradient);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 14px rgba(86, 36, 208, 0.25);
+    }
+
+    /* Course Cards */
+    .my-course-card {
+        background: white;
+        border-radius: var(--lms-radius);
+        overflow: hidden;
+        box-shadow: var(--lms-shadow);
+        transition: var(--lms-transition);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .my-course-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--lms-shadow-hover);
+    }
+
+    .my-course-img-wrap {
+        position: relative;
+        aspect-ratio: 16/9;
+        overflow: hidden;
+    }
+
+    .my-course-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .my-course-card:hover .my-course-img-wrap img {
+        transform: scale(1.05);
+    }
+
+    .progress-bar-custom {
+        height: 8px;
+        border-radius: 50px;
+        background-color: #e9ecef;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: var(--lms-gradient);
+        border-radius: 50px;
+        transition: width 0.6s ease;
+    }
+
+    .progress-bar-fill.completed {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    /* Empty State */
+    .empty-state-card {
+        background: white;
+        border-radius: var(--lms-radius);
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: var(--lms-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(86, 36, 208, 0.08);
+        color: var(--lms-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin: 0 auto 1.5rem;
+    }
+</style>
+
+<div class="my-courses-page">
+    <div class="container">
+
+        <!-- 1. PAGE HEADER -->
+        <header class="courses-header-banner">
+            <div class="row align-items-center">
+                <div class="col-lg-8 position-relative" style="z-index: 2;">
+                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1 rounded-pill mb-2">
+                        <i class="bi bi-journal-bookmark-fill me-1"></i> Student Learning Portal
+                    </span>
+                    <h1 class="display-6 fw-bold text-white mb-2">My Enrolled Courses</h1>
+                    <p class="lead text-white-50 mb-0" style="max-width: 620px;">
+                        Manage your active learning journey, track your lesson completions, and continue mastering your skills.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-end d-none d-lg-block position-relative" style="z-index: 2;">
+                    <a asp-area="" asp-controller="Courses" asp-action="Index" class="btn btn-gradient btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>Explore New Courses
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. COURSE STATISTICS -->
+        <section class="mb-4">
+            <div class="row g-3">
+                <div class="col-6 col-lg-3">
+                    <div class="course-stat-card">
+                        <div class="course-stat-icon total">
+                            <i class="bi bi-journals"></i>
+                        </div>
+                        <div>
+                            <div class="fs-4 fw-bold text-dark">@Model.Stats.TotalEnrolled</div>
+                            <div class="small text-muted fw-semibold">Total Enrolled</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="course-stat-card">
+                        <div class="course-stat-icon progress">
+                            <i class="bi bi-play-circle-fill"></i>
+                        </div>
+                        <div>
+                            <div class="fs-4 fw-bold text-dark">@Model.Stats.InProgressCount</div>
+                            <div class="small text-muted fw-semibold">In Progress</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="course-stat-card">
+                        <div class="course-stat-icon completed">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div>
+                            <div class="fs-4 fw-bold text-dark">@Model.Stats.CompletedCount</div>
+                            <div class="small text-muted fw-semibold">Completed</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <div class="course-stat-card">
+                        <div class="course-stat-icon avg">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <div>
+                            <div class="fs-4 fw-bold text-dark">@Model.Stats.AverageProgress%</div>
+                            <div class="small text-muted fw-semibold">Avg. Progress</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. SEARCH & FILTERS TOOLBAR -->
+        <section class="filter-bar">
+            <form method="get" asp-area="Student" asp-controller="Courses" asp-action="Index">
+                <input type="hidden" name="filter" value="@Model.ActiveFilter" />
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-5 col-lg-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" name="search" value="@Model.SearchTerm" class="form-control bg-light border-start-0 ps-0" placeholder="Search my courses by title or category..." />
+                            @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                            {
+                                <a asp-area="Student" asp-controller="Courses" asp-action="Index" asp-route-filter="@Model.ActiveFilter" class="btn btn-light border border-start-0 text-muted">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </a>
+                            }
+                            <button type="submit" class="btn btn-gradient">Search</button>
+                        </div>
+                    </div>
+                    <div class="col-md-7 col-lg-6 text-md-end">
+                        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                            <a asp-area="Student" asp-controller="Courses" asp-action="Index" asp-route-search="@Model.SearchTerm" asp-route-filter="All"
+                               class="filter-btn @(Model.ActiveFilter == "All" ? "active" : "")">
+                                <i class="bi bi-grid-fill"></i> All (@Model.Stats.TotalEnrolled)
+                            </a>
+                            <a asp-area="Student" asp-controller="Courses" asp-action="Index" asp-route-search="@Model.SearchTerm" asp-route-filter="InProgress"
+                               class="filter-btn @(Model.ActiveFilter == "InProgress" ? "active" : "")">
+                                <i class="bi bi-play-circle"></i> In Progress (@Model.Stats.InProgressCount)
+                            </a>
+                            <a asp-area="Student" asp-controller="Courses" asp-action="Index" asp-route-search="@Model.SearchTerm" asp-route-filter="Completed"
+                               class="filter-btn @(Model.ActiveFilter == "Completed" ? "active" : "")">
+                                <i class="bi bi-check2-circle"></i> Completed (@Model.Stats.CompletedCount)
+                            </a>
+                            <a asp-area="Student" asp-controller="Courses" asp-action="Index" asp-route-search="@Model.SearchTerm" asp-route-filter="NotStarted"
+                               class="filter-btn @(Model.ActiveFilter == "NotStarted" ? "active" : "")">
+                                <i class="bi bi-clock-history"></i> Not Started (@Model.Stats.NotStartedCount)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- 4. COURSE GRID OR EMPTY STATE -->
+        @if (Model.Courses.Any())
+        {
+            <div class="row g-4">
+                @foreach (var course in Model.Courses)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="my-course-card">
+                            <div class="my-course-img-wrap">
+                                @if (string.IsNullOrWhiteSpace(course.ImageUrl))
+                                {
+                                    <div class="course-img-fallback" aria-hidden="true"><span>AI</span><span>Learn by doing</span></div>
+                                }
+                                else
+                                {
+                                    <img src="@course.ImageUrl" alt="" />
+                                }
+                                <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-3 px-3 py-2">
+                                    @course.Category
+                                </span>
+                                <span class="badge @course.StatusBadgeClass position-absolute top-0 end-0 m-3 px-3 py-2">
+                                    @if (course.IsCompleted)
+                                    {
+                                        <i class="bi bi-check-circle-fill me-1"></i>
+                                    }
+                                    @course.StatusText
+                                </span>
+                            </div>
+                            <div class="p-4 d-flex flex-column flex-grow-1">
+                                <h5 class="fw-bold text-dark mb-2 text-truncate-2" style="min-height: 3rem;" title="@course.Title">
+                                    @course.Title
+                                </h5>
+                                <p class="text-muted small mb-3 text-truncate-2" style="min-height: 2.4rem;">
+                                    @course.ShortDescription
+                                </p>
+
+                                <div class="mt-auto pt-2">
+                                    <div class="d-flex justify-content-between align-items-center small mb-1">
+                                        <span class="text-muted"><i class="bi bi-book me-1"></i>@course.CompletedLessons of @course.TotalLessons Lessons</span>
+                                        <span class="fw-bold @(course.IsCompleted ? "text-success" : "text-primary")">@course.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress-bar-custom mb-3">
+                                        <div class="progress-bar-fill @(course.IsCompleted ? "completed" : "")" style="width: @course.ProgressPercentage%;"></div>
+                                    </div>
+
+                                    @if (course.IsCompleted)
+                                    {
+                                        <a asp-area="Student" asp-controller="Lessons" asp-action="Index" asp-route-courseId="@course.CourseId" class="btn btn-outline-success w-100 fw-semibold">
+                                            <i class="bi bi-check-circle me-1"></i>View Course
+                                        </a>
+                                    }
+                                    else if (course.IsNotStarted)
+                                    {
+                                        <a asp-area="Student" asp-controller="Lessons" asp-action="Index" asp-route-courseId="@course.CourseId" class="btn btn-gradient w-100">
+                                            <i class="bi bi-play-circle me-1"></i>Start Course
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-area="Student" asp-controller="Lessons" asp-action="Index" asp-route-courseId="@course.CourseId" class="btn btn-gradient w-100">
+                                            <i class="bi bi-play-fill me-1"></i>Continue Learning
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- 5. EMPTY STATE -->
+            <div class="empty-state-card">
+                <div class="empty-state-icon">
+                    <i class="bi bi-journal-x"></i>
+                </div>
+                <h3 class="fw-bold text-dark mb-2">No Enrolled Courses Found</h3>
+                <p class="text-muted mb-4 mx-auto" style="max-width: 500px;">
+                    @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
+                    {
+                        @:No courses matched your search criteria "<strong>@Model.SearchTerm</strong>". Try clearing your search or filter tab.
+                    }
+                    else
+                    {
+                        @:You have no courses under the <strong>@Model.ActiveFilter</strong> filter tab right now. Discover new courses and expand your career skills today!
+                    }
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    @if (!string.IsNullOrWhiteSpace(Model.SearchTerm) || Model.ActiveFilter != "All")
+                    {
+                        <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Filters
+                        </a>
+                    }
+                    <a asp-area="" asp-controller="Courses" asp-action="Index" class="btn btn-gradient btn-lg">
+                        <i class="bi bi-search me-2"></i>Browse Courses
+                    </a>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

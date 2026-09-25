@@ -1,0 +1,143 @@
+@model LearningManagementSystem.Web.Models.HomeIndexViewModel
+@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "About Us";
+}
+
+<style>
+    .page-hero {
+        background: linear-gradient(135deg, #5624d0 0%, #7c3aed 60%, #6d28d9 100%);
+        padding: 3.5rem 0 2.5rem;
+        color: #fff;
+    }
+
+        .page-hero .breadcrumb-trail {
+            font-size: .9rem;
+            opacity: .85;
+            margin-bottom: .75rem;
+        }
+
+            .page-hero .breadcrumb-trail a {
+                color: #fff;
+                text-decoration: none;
+                opacity: .9;
+            }
+
+                .page-hero .breadcrumb-trail a:hover {
+                    text-decoration: underline;
+                }
+
+        .page-hero h1 {
+            font-weight: 700;
+            font-size: 2.4rem;
+            margin-bottom: .5rem;
+        }
+
+        .page-hero p {
+            opacity: .9;
+            max-width: 680px;
+            margin-bottom: 0;
+        }
+
+    .mission-card {
+        background: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.07);
+        border-radius: var(--lms-radius);
+        padding: 2.25rem;
+        height: 100%;
+        transition: var(--lms-transition);
+    }
+
+        .mission-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--lms-shadow-hover);
+        }
+
+    .mission-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #fff;
+        margin-bottom: 1.25rem;
+    }
+
+    .about-story-img {
+        border-radius: var(--lms-radius);
+        box-shadow: var(--lms-shadow);
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        min-height: 340px;
+    }
+</style>
+
+<partial name="_Navbar" />
+
+<section class="page-hero">
+    <div class="container">
+        <div class="breadcrumb-trail"><a asp-area="" asp-controller="Home" asp-action="Index">Home</a> / About</div>
+        <h1>About AI Skills Academy</h1>
+        <p>We bring beginner AI lessons, practice and progress into one place.</p>
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-7">
+                <span class="section-label">OUR PURPOSE</span>
+                <h2 class="section-title">A clearer place to start learning AI</h2>
+                <p class="text-muted" style="line-height:1.8">It is easy to feel lost when AI lessons are spread across videos, articles and tools. AI Skills Academy brings the basics into a course you can follow at your own pace.</p>
+                <p class="text-muted" style="line-height:1.8">Read a lesson, try a task, take a quiz and see your progress. The course list grows when an administrator adds new content.</p>
+                <a class="btn btn-primary mt-2" asp-area="" asp-controller="Courses" asp-action="Index">See the courses</a>
+            </div>
+            <div class="col-lg-5">
+                <div class="mission-card">
+                    <span class="section-label">WHAT YOU CAN DO</span>
+                    <h3 class="h4 mt-2">Learn and check your work</h3>
+                    <ul class="list-unstyled text-muted mt-3 mb-0" style="line-height:2.2">
+                        <li>✓ Find a course that fits your level</li>
+                        <li>✓ Read lessons and mark them complete</li>
+                        <li>✓ Take quizzes and review scores</li>
+                        <li>✓ Submit a project for review</li>
+                        <li>✓ Track progress in your dashboard</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-padding bg-soft">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">THE ACADEMY TODAY</span>
+            <h2 class="section-title">See what is available</h2>
+            <p class="section-desc">These numbers come from the academy's current database.</p>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-sm-4"><div class="mission-card"><strong class="display-6">@Model.TotalPublishedCourses</strong><p class="mb-0">published courses</p></div></div>
+            <div class="col-sm-4"><div class="mission-card"><strong class="display-6">@Model.TotalStudents</strong><p class="mb-0">active learners</p></div></div>
+            <div class="col-sm-4"><div class="mission-card"><strong class="display-6">@Model.TotalCertificatesIssued</strong><p class="mb-0">certificates issued</p></div></div>
+        </div>
+    </div>
+</section>
+
+<section class="section-padding">
+    <div class="container">
+        <div class="cta-section">
+            <h2>Take the first step</h2>
+            <p>Explore the courses or create an account to save your progress.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a asp-area="" asp-controller="Courses" asp-action="Index" class="btn-white">Browse courses</a>
+                <a asp-area="" asp-controller="Account" asp-action="Register" class="btn-outline-white">Create an account</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<partial name="_Footer" />

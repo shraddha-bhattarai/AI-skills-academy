@@ -1,0 +1,222 @@
+@model LearningManagementSystem.Application.DTOs.Auth.RegisterViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Register";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AI Skills Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        :root {
+            --lms-primary: #5624d0;
+            --lms-accent: #a435f0;
+            --lms-gradient: linear-gradient(135deg, #5624d0 0%, #7c3aed 45%, #a435f0 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            background: var(--lms-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 480px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: var(--lms-gradient);
+            color: #fff;
+            text-align: center;
+            padding: 2.25rem 2rem 2rem;
+        }
+
+        .login-header .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-header h1 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            margin: 0 0 0.35rem;
+        }
+
+        .login-header p {
+            margin: 0;
+            opacity: 0.92;
+            font-size: 0.95rem;
+        }
+
+        .login-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #1c1d1f;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            border: 1.5px solid #e4e8eb;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--lms-primary);
+            box-shadow: 0 0 0 0.2rem rgba(86, 36, 208, 0.15);
+        }
+
+        .btn-login {
+            background: var(--lms-gradient);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-login:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(86, 36, 208, 0.35);
+        }
+
+        .register-link {
+            color: var(--lms-primary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .register-link:hover {
+            color: var(--lms-accent);
+            text-decoration: underline;
+        }
+
+        .validation-summary-errors {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.9rem;
+            color: #b91c1c;
+        }
+
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+
+        .field-validation-error {
+            font-size: 0.82rem;
+            color: #dc2626;
+        }
+
+        @@media (max-width: 575.98px) {
+            .login-body {
+                padding: 1.5rem;
+            }
+
+            .login-header {
+                padding: 1.75rem 1.5rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <a asp-controller="Home" asp-action="Index" class="brand-icon text-white text-decoration-none" title="Go to AI Skills Academy Home">
+                <i class="bi bi-mortarboard-fill"></i>
+            </a>
+            <h1>Create Account</h1>
+            <p>Join AI Skills Academy and start your learning journey</p>
+        </div>
+        <div class="login-body">
+            <form asp-action="Register" asp-controller="Account" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-6">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" placeholder="John" autocomplete="given-name" />
+                        <span asp-validation-for="FirstName" class="field-validation-error"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" placeholder="Doe" autocomplete="family-name" />
+                        <span asp-validation-for="LastName" class="field-validation-error"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="you@example.com" autocomplete="email" />
+                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" placeholder="Create a password" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="field-validation-error"></span>
+                </div>
+
+                <button type="submit" class="btn btn-login w-100 mb-3">
+                    <i class="bi bi-person-plus-fill me-1"></i> Register
+                </button>
+
+                <p class="text-center mb-0 small text-muted">
+                    Already have an account?
+                    <a asp-controller="Account" asp-action="Login" class="register-link">Sign In</a>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

@@ -1,0 +1,59 @@
+@model LessonDto
+@{
+    ViewData["Title"] = "Lesson Details";
+}
+
+<div class="container py-4">
+    <h1><i class="bi bi-play-circle me-2"></i>Lesson Details</h1>
+    <hr />
+
+    <dl class="row">
+        <dt class="col-sm-3">Title</dt>
+        <dd class="col-sm-9">@Model.Title</dd>
+
+        <dt class="col-sm-3">Course</dt>
+        <dd class="col-sm-9">@Model.CourseTitle</dd>
+
+        <dt class="col-sm-3">Content</dt>
+        <dd class="col-sm-9">@Model.Content</dd>
+
+        <dt class="col-sm-3">Video URL</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.VideoUrl))
+            {
+                <a href="@Model.VideoUrl" target="_blank">@Model.VideoUrl</a>
+            }
+            else
+            {
+                <span>&mdash;</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">Notes URL</dt>
+        <dd class="col-sm-9">
+            @if (!string.IsNullOrEmpty(Model.NotesUrl))
+            {
+                <a href="@Model.NotesUrl" target="_blank">@Model.NotesUrl</a>
+            }
+            else
+            {
+                <span>&mdash;</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">Created At</dt>
+        <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+    </dl>
+
+    <div class="mt-3">
+        <a asp-area="Admin" asp-controller="Lessons" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        <a asp-area="Admin" asp-controller="Lessons" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to List
+        </a>
+        <a asp-area="Admin" asp-controller="Resources" asp-action="Index" asp-route-lessonId="@Model.Id" class="btn btn-outline-primary">
+            <i class="bi bi-paperclip me-1"></i>Manage Resources
+        </a>
+    </div>
+</div>

@@ -1,0 +1,274 @@
+@model LearningManagementSystem.Application.DTOs.Assignments.StudentAssignmentDto
+@using LearningManagementSystem.Domain.Enums
+@{
+    ViewData["Title"] = Model.Title + " - Assignment Details";
+    Layout = "_StudentLayout";
+
+    var isOverdue = (Model.SubmissionStatus == null || Model.SubmissionStatus == SubmissionStatus.Pending) && Model.DueDate < DateTime.UtcNow;
+}
+
+<style>
+    .details-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        margin-bottom: 2rem;
+    }
+    .info-tile {
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 1rem 1.25rem;
+        border: 1px solid #e2e8f0;
+    }
+    .submission-box {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(86, 36, 208, 0.1);
+        overflow: hidden;
+    }
+    .submission-box-header {
+        background: linear-gradient(135deg, var(--lms-primary-dark), var(--lms-primary));
+        color: white;
+        padding: 1.25rem 1.5rem;
+    }
+    .submission-box-body {
+        padding: 1.5rem;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Navigation Back Link -->
+    <div class="mb-3">
+        <a asp-area="Student" asp-controller="Assignments" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Assignments
+        </a>
+    </div>
+
+    <!-- Alert Notifications -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm p-3 mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2 fs-5 align-middle"></i>
+            <span>@TempData["Success"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm p-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>
+            <span>@TempData["Error"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Hero / Assignment Banner Header -->
+    <div class="details-hero">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <div class="mb-2">
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-semibold">
+                        <i class="bi bi-book me-1"></i> @Model.CourseTitle
+                    </span>
+                </div>
+                <h2 class="fw-bold text-dark mb-2">@Model.Title</h2>
+                <div class="d-flex flex-wrap align-items-center gap-3 text-secondary small">
+                    <div>
+                        <i class="bi bi-calendar-event text-primary me-1"></i>
+                        <span>Due Date: <strong class="text-dark">@Model.DueDate.ToString("dddd, MMMM dd, yyyy hh:mm tt")</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                @if (Model.SubmissionStatus == SubmissionStatus.Graded)
+                {
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-4 py-2 fs-6">
+                        <i class="bi bi-check-circle-fill me-1"></i> Graded
+                    </span>
+                }
+                else if (Model.SubmissionStatus == SubmissionStatus.Submitted)
+                {
+                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-4 py-2 fs-6">
+                        <i class="bi bi-clock-history me-1"></i> Submitted
+                    </span>
+                }
+                else if (isOverdue)
+                {
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-4 py-2 fs-6">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Overdue
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-4 py-2 fs-6">
+                        <i class="bi bi-hourglass-split me-1"></i> Pending Submission
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="row g-4">
+        <!-- Left Side: Assignment Instructions & Meta -->
+        <div class="col-lg-7 col-xl-8">
+            <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+                <h4 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+                    <i class="bi bi-file-text me-2 text-primary"></i> Instructions & Description
+                </h4>
+                <div class="text-secondary leading-relaxed mb-4 fs-6">
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <p style="white-space: pre-line;">@Model.Description</p>
+                    }
+                    else
+                    {
+                        <p class="fst-italic text-muted">No specific description or guidelines provided for this assignment.</p>
+                    }
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="info-tile d-flex align-items-center gap-3">
+                            <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-3">
+                                <i class="bi bi-calendar-check fs-4"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block fw-medium">Deadline</small>
+                                <strong class="text-dark">@Model.DueDate.ToString("MMM dd, yyyy")</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-tile d-flex align-items-center gap-3">
+                            <div class="p-3 bg-success bg-opacity-10 text-success rounded-3">
+                                <i class="bi bi-award fs-4"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block fw-medium">Awarded Score</small>
+                                <strong class="text-dark">@(Model.Marks.HasValue ? $"{Model.Marks.Value} pts" : "Not Graded Yet")</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Submission Action Panel -->
+        <div class="col-lg-5 col-xl-4">
+            <div class="submission-box">
+                <div class="submission-box-header">
+                    <h5 class="fw-bold mb-0">
+                        <i class="bi bi-cloud-upload me-2"></i> Solution Submission
+                    </h5>
+                </div>
+                <div class="submission-box-body">
+                    @if (Model.SubmissionStatus == SubmissionStatus.Graded)
+                    {
+                        <div class="alert alert-success border-0 rounded-4 p-3 mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-patch-check-fill fs-3 me-2 text-success"></i>
+                                <div>
+                                    <strong class="d-block text-success">Assignment Graded</strong>
+                                    <small class="text-muted">Your score has been updated by the instructor.</small>
+                                </div>
+                            </div>
+                            <hr class="my-2 text-success opacity-25" />
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="fw-medium text-dark">Obtained Marks:</span>
+                                <span class="badge bg-success fs-6 rounded-pill px-3">@Model.Marks pts</span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Feedback))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark small">
+                                    <i class="bi bi-chat-left-text me-1"></i> Instructor Feedback
+                                </label>
+                                <div class="p-3 bg-light rounded-3 border text-secondary" style="white-space: pre-line;">@Model.Feedback</div>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(Model.FilePath))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark small">Submitted Solution File:</label>
+                                <a href="@Model.FilePath" target="_blank" class="btn btn-outline-primary w-100 rounded-pill py-2">
+                                    <i class="bi bi-file-earmark-arrow-down me-1"></i> View Submitted File
+                                </a>
+                            </div>
+                        }
+                    }
+                    else if (Model.SubmissionStatus == SubmissionStatus.Submitted)
+                    {
+                        <div class="alert alert-info border-0 rounded-4 p-3 mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-check-circle-fill fs-3 me-2 text-info"></i>
+                                <div>
+                                    <strong class="d-block text-info">Submitted Successfully</strong>
+                                    <small class="text-muted">
+                                        Submitted on @(Model.SubmittedAt?.ToString("MMM dd, yyyy hh:mm tt") ?? "Recently")
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.FilePath))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark small">Submitted File:</label>
+                                <a href="@Model.FilePath" target="_blank" class="btn btn-outline-secondary w-100 rounded-pill py-2 mb-3">
+                                    <i class="bi bi-file-earmark-arrow-down me-1"></i> Download Submitted File
+                                </a>
+                            </div>
+                        }
+
+                        <hr class="my-3 text-muted opacity-25" />
+                        <h6 class="fw-bold text-dark mb-2">Update Submission</h6>
+                        <form asp-area="Student" asp-controller="Assignments" asp-action="Submit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-secondary">Upload New Solution File</label>
+                                <input type="file" name="file" class="form-control rounded-3" required />
+                            </div>
+                            <button type="submit" class="btn btn-warning text-dark w-100 rounded-pill py-2 fw-semibold">
+                                <i class="bi bi-arrow-repeat me-1"></i> Re-submit Solution
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        @if (isOverdue)
+                        {
+                            <div class="alert alert-danger border-0 rounded-4 p-3 mb-3">
+                                <i class="bi bi-exclamation-triangle-fill fs-4 me-2 align-middle text-danger"></i>
+                                <strong>Deadline Passed</strong>
+                                <p class="small mb-0 mt-1">This assignment is overdue, but you can still upload your solution if allowed by your course policy.</p>
+                            </div>
+                        }
+
+                        <form asp-area="Student" asp-controller="Assignments" asp-action="Submit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-dark small">
+                                    <i class="bi bi-paperclip me-1"></i> Upload File Solution
+                                </label>
+                                <input type="file" name="file" class="form-control rounded-3 p-2" required />
+                                <div class="form-text small">Accepted formats: PDF, DOCX, ZIP, TXT, Code files.</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2.5 fw-semibold shadow-sm">
+                                <i class="bi bi-cloud-upload me-1"></i> Submit Assignment
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

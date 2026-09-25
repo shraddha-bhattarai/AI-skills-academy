@@ -1,0 +1,103 @@
+@{
+    var area = ViewContext.RouteData.Values["area"]?.ToString() ?? "";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var transparent = ViewData["NavTransparent"] as bool? == true;
+    var navClass = transparent ? "landing-nav nav-transparent" : "landing-nav scrolled nav-solid";
+}
+
+<nav class="navbar navbar-expand-xl navbar-dark @navClass" id="landingNavbar" aria-label="Main navigation">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+            <span class="brand-icon" aria-hidden="true"><i class="bi bi-mortarboard-fill"></i></span>
+            <span class="brand-name">AI Skills Academy</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#landingNavMenu"
+                aria-controls="landingNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="landingNavMenu">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link @(string.IsNullOrEmpty(area) && controller == "Home" && action == "Index" ? "active" : "")"
+                       asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                </li>
+                @if (User.IsInRole("Student"))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(area == "Student" && controller == "Home" ? "active" : "")"
+                           asp-area="Student" asp-controller="Home" asp-action="Index">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(area == "Student" && controller == "Courses" ? "active" : "")"
+                           asp-area="Student" asp-controller="Courses" asp-action="Index">My Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(area == "Student" && controller == "Assignments" ? "active" : "")"
+                           asp-area="Student" asp-controller="Assignments" asp-action="Index">Assignments</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(area == "Student" && controller == "Quiz" ? "active" : "")"
+                           asp-area="Student" asp-controller="Quiz" asp-action="Index">Quizzes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(area == "Student" && controller == "Certificate" ? "active" : "")"
+                           asp-area="Student" asp-controller="Certificate" asp-action="Index">Certificates</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(area == "Student" && controller == "Notification" ? "active" : "")"
+                           asp-area="Student" asp-controller="Notification" asp-action="Index">Notifications</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(controller == "Courses" ? "active" : "")"
+                           asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link @(controller == "Categories" ? "active" : "")"
+                           asp-area="" asp-controller="Categories" asp-action="Index">Categories</a>
+                    </li>
+                }
+                <li class="nav-item">
+                    <a class="nav-link @(controller == "Home" && action == "About" ? "active" : "")"
+                       asp-area="" asp-controller="Home" asp-action="About">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(controller == "Home" && action == "Contact" ? "active" : "")"
+                       asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
+                </li>
+            </ul>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a class="btn btn-nav-register" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                            <i class="bi bi-shield-lock me-1"></i> Admin Portal
+                        </a>
+                    }
+                    else if (User.IsInRole("Student"))
+                    {
+                        <a class="btn btn-nav-register" asp-area="Student" asp-controller="Home" asp-action="Index">
+                            <i class="bi bi-speedometer2 me-1"></i> Student Dashboard
+                        </a>
+                    }
+                    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-nav-login">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn btn-nav-login @(controller == "Account" && action == "Login" ? "active" : "")"
+                       asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+                    <a class="btn btn-nav-register @(controller == "Account" && action == "Register" ? "active" : "")"
+                       asp-area="" asp-controller="Account" asp-action="Register">Register</a>
+                }
+            </div>
+        </div>
+    </div>
+</nav>

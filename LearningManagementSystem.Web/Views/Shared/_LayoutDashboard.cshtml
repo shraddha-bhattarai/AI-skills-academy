@@ -1,0 +1,30 @@
+@{
+    Layout = "_Layout";
+    ViewData["UseDashboardLayout"] = true;
+    ViewData["NavTransparent"] = false;
+}
+
+<div class="dashboard-shell">
+    <aside class="dashboard-sidebar" id="dashboardSidebar">
+        <div class="dashboard-sidebar-brand">
+            <span class="brand-icon"><i class="bi bi-mortarboard-fill"></i></span>
+            AI Skills Academy
+        </div>
+        @await RenderSectionAsync("Sidebar", required: true)
+    </aside>
+    <div class="dashboard-main">
+        <header class="dashboard-topbar">
+            <button type="button" class="btn btn-dashboard-toggle d-lg-none" id="sidebarToggle" aria-label="Toggle sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="dashboard-topbar-title">@ViewData["DashboardTitle"]</div>
+            <div class="dashboard-topbar-actions">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-primary-custom">View Site</a>
+            </div>
+        </header>
+        <div class="dashboard-content animate-fade-in">
+            <partial name="_AlertMessages" />
+            @RenderBody()
+        </div>
+    </div>
+</div>

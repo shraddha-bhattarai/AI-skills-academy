@@ -1,0 +1,42 @@
+@model LearningManagementSystem.Application.DTOs.Discussions.CreateDiscussionDto
+@{
+    ViewData["Title"] = "New Discussion";
+    Layout = "_StudentLayout";
+}
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-area="Student" asp-controller="Discussions" asp-action="Index" asp-route-courseId="@Model.CourseId" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Discussions
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <h4 class="fw-bold text-dark mb-3"><i class="bi bi-chat-left-text me-2 text-primary"></i>Start a New Discussion</h4>
+
+        <form asp-area="Student" asp-controller="Discussions" asp-action="Create" method="post">
+            <input type="hidden" asp-for="CourseId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label fw-semibold"></label>
+                <input asp-for="Title" class="form-control" placeholder="What's your question or topic?" />
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Content" class="form-label fw-semibold"></label>
+                <textarea asp-for="Content" class="form-control" rows="6" placeholder="Share the details..."></textarea>
+                <span asp-validation-for="Content" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                <i class="bi bi-send me-1"></i> Post Discussion
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

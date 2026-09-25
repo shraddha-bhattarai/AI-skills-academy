@@ -1,0 +1,84 @@
+@model CourseDto
+@{
+    ViewData["Title"] = Model.Title;
+    var isStudent = (bool)(ViewBag.IsStudent ?? false);
+    var isEnrolled = (bool)(ViewBag.IsEnrolled ?? false);
+    var isBookmarked = (bool)(ViewBag.IsBookmarked ?? false);
+}
+
+<section class="course-details-hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-8">
+                <a asp-area="" asp-controller="Courses" asp-action="Index" class="course-back">← All courses</a>
+                <p class="course-details-eyebrow">@Model.CategoryName · @Model.Level</p>
+                <h1>@Model.Title</h1>
+                <p class="course-details-intro">@Model.Description</p>
+                <div class="d-flex flex-wrap gap-3 course-details-meta"><span>@Model.LessonCount lesson@(Model.LessonCount == 1 ? "" : "s")</span><span>@Model.EnrollmentCount learner@(Model.EnrollmentCount == 1 ? "" : "s")</span><span>@(Model.Price == 0 ? "Free course" : "Course access")</span></div>
+            </div>
+            <div class="col-lg-4">
+                <div class="course-action-card">
+                    <h2>Start learning</h2>
+                    <p>Open the course and work through the lessons at your pace.</p>
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <a class="btn btn-primary w-100" asp-area="" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Courses", new { id = Model.Id })">Log in to join</a>
+                        <p class="mt-3 mb-0 small">New here? <a asp-area="" asp-controller="Account" asp-action="Register">Create an account</a></p>
+                    }
+                    else if (isStudent && isEnrolled)
+                    {
+                        <a class="btn btn-primary w-100" asp-area="Student" asp-controller="Lessons" asp-action="Index" asp-route-courseId="@Model.Id">Continue lessons</a>
+                    }
+                    else if (isStudent)
+                    {
+                        <form asp-area="Student" asp-controller="Courses" asp-action="Enroll" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="courseId" value="@Model.Id" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Courses", new { id = Model.Id })" />
+                            <button class="btn btn-primary w-100" type="submit">Join this course</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="mb-0">Use a learner account to join this course.</p>
+                    }
+                    @if (isStudent)
+                    {
+                        <form asp-area="Student" asp-controller="Bookmarks" asp-action="Toggle" method="post" class="mt-3">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="courseId" value="@Model.Id" />
+                            <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Courses", new { id = Model.Id })" />
+                            <button type="submit" class="btn btn-outline-secondary w-100">@(isBookmarked ? "Remove bookmark" : "Save for later")</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container course-details-body">
+    @if (TempData["Success"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">@successMessage</div>
+    }
+    @if (TempData["Error"] is string errorMessage)
+    {
+        <div class="alert alert-danger" role="alert">@errorMessage</div>
+    }
+    <div class="row g-5">
+        <div class="col-lg-8">
+            <h2>What you will learn</h2>
+            @if (string.IsNullOrWhiteSpace(Model.LearningOutcomes))
+            {
+                <p>The course lessons and activities introduce this topic step by step.</p>
+            }
+            else
+            {
+                <p style="white-space:pre-line">@Model.LearningOutcomes</p>
+            }
+            <h2>How the course works</h2>
+            <p>Join the course to read lessons, mark them complete and track your progress. Quizzes and projects appear when the course has them.</p>
+        </div>
+    </div>
+</section>

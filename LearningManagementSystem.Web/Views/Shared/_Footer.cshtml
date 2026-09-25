@@ -1,0 +1,29 @@
+<footer class="landing-footer">
+    <div class="container">
+        <div class="row g-4 justify-content-between">
+            <div class="col-lg-5">
+                <div class="footer-brand d-flex align-items-center gap-2">
+                    <span class="brand-icon">AI</span> AI Skills Academy
+                </div>
+                <p class="footer-desc">A place to learn AI basics through lessons, quizzes and projects. Learn at your own pace and keep track of your progress.</p>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <h6>Learn</h6>
+                <ul>
+                    <li><a asp-area="" asp-controller="Courses" asp-action="Index">Courses</a></li>
+                    <li><a asp-area="" asp-controller="Categories" asp-action="Index">Topics</a></li>
+                    <li><a asp-area="" asp-controller="Account" asp-action="Register">Create an account</a></li>
+                </ul>
+            </div>
+            <div class="col-6 col-md-3 col-lg-2">
+                <h6>Academy</h6>
+                <ul>
+                    <li><a asp-area="" asp-controller="Home" asp-action="About">About</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                    <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">&copy; @DateTime.UtcNow.Year AI Skills Academy</div>
+    </div>
+</footer>

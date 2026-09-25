@@ -1,0 +1,72 @@
+@model LearningManagementSystem.Application.DTOs.Notifications.NotificationDto
+@using LearningManagementSystem.Domain.Enums
+@{
+    ViewData["Title"] = Model.Title + " - Notification Details";
+    Layout = "_StudentLayout";
+}
+
+<style>
+    .notif-details-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        overflow: hidden;
+    }
+    .notif-details-header {
+        background: linear-gradient(135deg, var(--lms-primary-dark), var(--lms-primary));
+        color: white;
+        padding: 2rem;
+    }
+    .notif-details-body {
+        padding: 2rem;
+    }
+    .btn-gradient {
+        background: var(--lms-gradient);
+        color: white !important;
+        border: none;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Back Navigation -->
+    <div class="mb-3">
+        <a asp-area="Student" asp-controller="Notification" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Notifications
+        </a>
+    </div>
+
+    <!-- Notification Details Card -->
+    <div class="notif-details-card mx-auto" style="max-width: 800px;">
+        <div class="notif-details-header">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1 fw-semibold small">
+                    <i class="bi bi-tag me-1"></i> @Model.Type.ToString()
+                </span>
+                <span class="text-white opacity-75 small">
+                    <i class="bi bi-clock me-1"></i> @Model.CreatedAt.ToString("MMMM dd, yyyy • hh:mm tt")
+                </span>
+            </div>
+            <h2 class="fw-bold text-white mb-0">@Model.Title</h2>
+        </div>
+        <div class="notif-details-body">
+            <h6 class="text-uppercase text-muted fw-semibold small mb-2" style="letter-spacing: 1px;">Message Details</h6>
+            <div class="p-3 bg-light rounded-4 border border-light mb-4 text-dark fs-6 lh-relaxed">
+                @Model.Message
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pt-3 border-top">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 fw-semibold">
+                        <i class="bi bi-check-circle-fill me-1"></i> Marked as Read
+                    </span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-area="Student" asp-controller="Notification" asp-action="Index" class="btn btn-gradient rounded-pill px-4">
+                        <i class="bi bi-arrow-left me-1"></i> Return to Notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,147 @@
+@model LearningManagementSystem.Application.DTOs.Lessons.StudentLessonDto
+@{
+    ViewData["Title"] = Model.Title + " - Lesson";
+    Layout = "_StudentLayout";
+
+    var videoExtensions = new[] { ".mp4", ".webm", ".ogg" };
+    var isDirectVideoFile = !string.IsNullOrWhiteSpace(Model.VideoUrl) &&
+        videoExtensions.Any(ext => Model.VideoUrl!.ToLowerInvariant().Contains(ext));
+}
+
+<style>
+    .lesson-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        margin-bottom: 2rem;
+    }
+    .lesson-content-box {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(86, 36, 208, 0.1);
+        padding: 1.5rem;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-area="Student" asp-controller="Lessons" asp-action="Index" asp-route-courseId="@Model.CourseId" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Lessons
+        </a>
+    </div>
+
+    <div class="lesson-hero">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-semibold mb-2">
+                    <i class="bi bi-book me-1"></i> @Model.CourseTitle
+                </span>
+                <h2 class="fw-bold text-dark mb-0">@Model.Title</h2>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                @if (Model.IsCompleted)
+                {
+                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-4 py-2 fs-6">
+                        <i class="bi bi-check-circle-fill me-1"></i> Completed
+                        @if (Model.CompletedAt.HasValue)
+                        {
+                            <span class="d-block small fw-normal mt-1">@Model.CompletedAt.Value.ToString("MMM dd, yyyy")</span>
+                        }
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-4 py-2 fs-6">
+                        <i class="bi bi-hourglass-split me-1"></i> Not Completed
+                    </span>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="lesson-content-box mb-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-file-text me-2 text-primary"></i>Lesson Content</h5>
+                <div class="text-secondary" style="white-space: pre-line;">@Model.Content</div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.VideoUrl))
+            {
+                <div class="lesson-content-box mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-play-circle me-2 text-primary"></i>Video</h5>
+                    @if (isDirectVideoFile)
+                    {
+                        <video controls class="w-100 rounded-3" style="max-height: 480px;">
+                            <source src="@Model.VideoUrl" />
+                            Your browser does not support the video tag.
+                        </video>
+                    }
+                    <a href="@Model.VideoUrl" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary mt-3 rounded-pill px-4">
+                        <i class="bi bi-box-arrow-up-right me-1"></i> Watch Video
+                    </a>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.NotesUrl))
+            {
+                <div class="lesson-content-box mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-file-earmark-text me-2 text-primary"></i>Notes</h5>
+                    <a href="@Model.NotesUrl" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="bi bi-download me-1"></i> View / Download Notes
+                    </a>
+                </div>
+            }
+
+            @if (Model.Resources.Any())
+            {
+                <div class="lesson-content-box mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-paperclip me-2 text-primary"></i>Resources</h5>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var resource in Model.Resources)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <div class="fw-semibold">@resource.Title</div>
+                                    @if (!string.IsNullOrWhiteSpace(resource.Description))
+                                    {
+                                        <div class="text-muted small">@resource.Description</div>
+                                    }
+                                </div>
+                                <a href="@resource.FileUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary rounded-pill">
+                                    <i class="bi bi-download me-1"></i> Open
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="lesson-content-box text-center">
+                @if (Model.IsCompleted)
+                {
+                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                    <h5 class="fw-bold text-dark mt-3 mb-2">Lesson Completed</h5>
+                    <p class="text-muted small">You marked this lesson as complete@(Model.CompletedAt.HasValue ? $" on {Model.CompletedAt.Value:MMM dd, yyyy}" : "").</p>
+                }
+                else
+                {
+                    <i class="bi bi-hourglass-split text-warning" style="font-size: 3rem;"></i>
+                    <h5 class="fw-bold text-dark mt-3 mb-2">Finished this lesson?</h5>
+                    <p class="text-muted small mb-3">Mark it complete to track your progress in this course.</p>
+                    <form asp-area="Student" asp-controller="Lessons" asp-action="MarkComplete" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-success w-100 rounded-pill py-2 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i> Mark Complete
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

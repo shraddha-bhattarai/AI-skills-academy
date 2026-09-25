@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="container py-4">
+    <h1><i class="bi bi-bar-chart-line me-2"></i>Reports</h1>
+    <p class="text-muted">Real-time reports generated from the live database — no static or sample data.</p>
+    <hr />
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-person-check text-primary" style="font-size: 2.5rem;"></i>
+                    <h5 class="fw-bold mt-3">Enrollment Report</h5>
+                    <p class="text-muted small">Every enrollment, with real progress and completion status, filterable by course.</p>
+                    <a asp-area="Admin" asp-controller="Reports" asp-action="Enrollments" class="btn btn-primary rounded-pill px-4">View Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-graph-up text-success" style="font-size: 2.5rem;"></i>
+                    <h5 class="fw-bold mt-3">Course Progress Report</h5>
+                    <p class="text-muted small">Per-course lesson counts, enrolled students, average progress, and completion counts.</p>
+                    <a asp-area="Admin" asp-controller="Reports" asp-action="Progress" class="btn btn-success rounded-pill px-4">View Report</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-patch-question text-warning" style="font-size: 2.5rem;"></i>
+                    <h5 class="fw-bold mt-3">Quiz Results Report</h5>
+                    <p class="text-muted small">Per-quiz attempt counts, pass rate, and average score across all real attempts.</p>
+                    <a asp-area="Admin" asp-controller="Reports" asp-action="QuizResults" class="btn btn-warning text-dark rounded-pill px-4">View Report</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

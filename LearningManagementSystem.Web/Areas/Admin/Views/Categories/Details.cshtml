@@ -1,0 +1,232 @@
+@model CategoryDto
+@{
+    ViewData["Title"] = $"{Model.Name} - Category Details";
+    var relatedCourses = ViewBag.RelatedCourses as IReadOnlyList<CourseDto> ?? new List<CourseDto>();
+}
+
+@section Styles {
+<style>
+    .details-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c1d95 100%);
+        border-radius: var(--lms-radius, 16px);
+        padding: 2.5rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .details-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 80% 20%, rgba(164, 53, 240, 0.25) 0%, transparent 60%);
+    }
+
+    .details-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        padding: 2rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
+
+    .meta-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid #edf2f7;
+    }
+
+    .meta-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--lms-muted, #6a6f73);
+        margin-bottom: 0.25rem;
+    }
+
+    .meta-value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--lms-dark, #1c1d1f);
+    }
+
+    .badge-course-count {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .courses-table {
+        margin-bottom: 0;
+    }
+
+    .courses-table th {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--lms-muted, #6a6f73);
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid #edf2f7;
+        background: #f8fafc;
+    }
+
+    .courses-table td {
+        padding: 0.85rem 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
+    }
+
+    .courses-table tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.85rem;">
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Dashboard</a></li>
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Categories" asp-action="Index" class="text-decoration-none text-muted">Categories</a></li>
+            <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">@Model.Name</li>
+        </ol>
+    </nav>
+
+    @* ── Header Hero ── *@
+    <div class="details-hero">
+        <div class="position-relative">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="badge-course-count"><i class="bi bi-collection-fill me-1"></i> @Model.CourseCount @(Model.CourseCount == 1 ? "Course" : "Courses")</span>
+            </div>
+            <h1 class="fw-bold mb-2">@Model.Name</h1>
+            <p class="opacity-75 mb-0" style="max-width: 700px;">
+                Created on @Model.CreatedAt.ToString("MMMM d, yyyy 'at' h:mm tt")
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        @* ── Main Column / Details & Courses ── *@
+        <div class="col-lg-8">
+            <div class="details-card mb-4">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle-fill text-primary me-2"></i>Description</h4>
+                <div class="text-muted" style="line-height: 1.8; font-size: 0.95rem;">
+                    @(string.IsNullOrWhiteSpace(Model.Description) ? "No description provided for this category." : Model.Description)
+                </div>
+            </div>
+
+            <div class="details-card">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-collection-fill text-primary me-2"></i>Associated Courses (@Model.CourseCount)
+                    </h5>
+                    @if (Model.CourseCount > 0)
+                    {
+                        <a asp-area="Admin" asp-controller="Courses" asp-action="Index" asp-route-categoryId="@Model.Id" class="small text-decoration-none text-primary fw-semibold">
+                            View All in Courses <i class="bi bi-arrow-right"></i>
+                        </a>
+                    }
+                </div>
+
+                @if (relatedCourses.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table courses-table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Course Title</th>
+                                    <th>Level</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var course in relatedCourses)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-semibold text-dark">@course.Title</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark">@course.Level</span>
+                                        </td>
+                                        <td>
+                                            <span class="fw-semibold">@(course.Price == 0 ? "Free" : course.Price.ToString("C"))</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(course.Status == CourseStatus.Published ? "bg-success" : course.Status == CourseStatus.Draft ? "bg-warning text-dark" : "bg-secondary") rounded-pill">
+                                                @course.Status
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a asp-area="Admin" asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id" class="btn btn-sm btn-outline-primary" title="View Course">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-journal-x fs-2 d-block mb-2 text-secondary"></i>
+                        <p class="mb-2">No courses are currently assigned to this category.</p>
+                        <a asp-area="Admin" asp-controller="Courses" asp-action="Create" class="btn btn-sm btn-primary" style="background: var(--lms-gradient); border: none; border-radius: 8px;">
+                            <i class="bi bi-plus-lg me-1"></i> Create Course in Category
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* ── Sidebar Column / Overview & Actions ── *@
+        <div class="col-lg-4">
+            <div class="details-card d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-folder2-open text-primary me-2"></i>Category Overview</h5>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <div class="meta-box">
+                                <div class="meta-label">Total Courses</div>
+                                <div class="meta-value text-primary">@Model.CourseCount</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="meta-box">
+                                <div class="meta-label">Created Date</div>
+                                <div class="meta-value" style="font-size: 0.95rem;">@Model.CreatedAt.ToString("MMM d, yyyy")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-top d-flex flex-column gap-2">
+                    <a asp-area="Admin" asp-controller="Categories" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary w-100 fw-semibold" style="background: var(--lms-gradient); border: none; border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Category
+                    </a>
+                    <a asp-area="Admin" asp-controller="Categories" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100 fw-semibold" style="border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-trash me-1"></i> Delete Category
+                    </a>
+                    <a asp-area="Admin" asp-controller="Categories" asp-action="Index" class="btn btn-light w-100 text-muted fw-semibold" style="border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Categories
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

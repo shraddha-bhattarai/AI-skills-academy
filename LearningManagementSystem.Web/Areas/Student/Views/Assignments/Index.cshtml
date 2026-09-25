@@ -1,0 +1,367 @@
+@model IEnumerable<LearningManagementSystem.Application.DTOs.Assignments.StudentAssignmentDto>
+@using LearningManagementSystem.Domain.Enums
+@{
+    ViewData["Title"] = "My Assignments";
+    Layout = "_StudentLayout";
+
+    string activeFilter = ViewBag.ActiveFilter as string ?? "All";
+    string search = ViewBag.Search as string ?? "";
+    int totalCount = ViewBag.TotalCount ?? 0;
+    int pendingCount = ViewBag.PendingCount ?? 0;
+    int submittedCount = ViewBag.SubmittedCount ?? 0;
+    int gradedCount = ViewBag.GradedCount ?? 0;
+    int overdueCount = ViewBag.OverdueCount ?? 0;
+}
+
+<style>
+    .assignments-hero {
+        background: linear-gradient(135deg, #1a0533 0%, #2d1b69 40%, #5624d0 75%, #7c3aed 100%);
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--lms-radius);
+        padding: 2.5rem 2rem;
+        color: #ffffff;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(86, 36, 208, 0.25);
+    }
+    .assignments-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 85% 15%, rgba(164, 53, 240, 0.35) 0%, transparent 60%);
+        pointer-events: none;
+    }
+    .assignments-hero .hero-content-wrap {
+        position: relative;
+        z-index: 2;
+    }
+    .assignments-hero .hero-badge {
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    .assignments-hero .pending-card {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    .stat-card-custom {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(86, 36, 208, 0.1);
+    }
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    .filter-pill {
+        border-radius: 50px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #4b5563;
+        background: #f3f4f6;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .filter-pill:hover, .filter-pill.active {
+        background: var(--lms-gradient);
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(86, 36, 208, 0.25);
+    }
+    .assignment-card {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: all 0.25s ease;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .assignment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(86, 36, 208, 0.12);
+        border-color: rgba(86, 36, 208, 0.25);
+    }
+    .assignment-card-header {
+        padding: 1.25rem 1.5rem 0.75rem 1.5rem;
+    }
+    .assignment-card-body {
+        padding: 0.75rem 1.5rem 1.25rem 1.5rem;
+        flex-grow: 1;
+    }
+    .assignment-card-footer {
+        padding: 1rem 1.5rem;
+        background-color: #fafafa;
+        border-top: 1px solid #f0f0f0;
+    }
+    .course-badge {
+        background: rgba(86, 36, 208, 0.08);
+        color: var(--lms-primary-dark);
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Hero Banner -->
+    <div class="assignments-hero">
+        <div class="row align-items-center hero-content-wrap">
+            <div class="col-lg-8">
+                <span class="badge hero-badge rounded-pill px-3 py-2 mb-3 fw-semibold">
+                    <i class="bi bi-journal-check me-1"></i> Course Coursework
+                </span>
+                <h1 class="fw-bold mb-2 text-white">Student Assignments</h1>
+                <p class="mb-0 text-white fs-6" style="opacity: 0.95;">
+                    Track, complete, and submit assignments for your enrolled courses on AI Skills Academy.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <div class="d-inline-flex align-items-center pending-card rounded-4 p-3">
+                    <i class="bi bi-clock-history fs-1 text-white me-3"></i>
+                    <div class="text-start">
+                        <div class="fs-4 fw-bold text-white mb-0">@pendingCount</div>
+                        <small class="text-white fw-medium" style="opacity: 0.9;">Pending Tasks</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-journal-text"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@totalCount</h4>
+                    <span class="text-muted small fw-medium">Total Tasks</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@pendingCount</h4>
+                    <span class="text-muted small fw-medium">Pending</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-cloud-upload"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@submittedCount</h4>
+                    <span class="text-muted small fw-medium">Submitted</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-patch-check"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@gradedCount</h4>
+                    <span class="text-muted small fw-medium">Graded</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters & Search Bar -->
+    <div class="bg-white rounded-4 p-3 mb-4 shadow-sm border border-light">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-7">
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-area="Student" asp-controller="Assignments" asp-action="Index" asp-route-filter="All" asp-route-search="@search"
+                       class="filter-pill @(activeFilter == "All" ? "active" : "")">
+                        All <span class="badge bg-secondary bg-opacity-20 text-dark rounded-pill ms-1">@totalCount</span>
+                    </a>
+                    <a asp-area="Student" asp-controller="Assignments" asp-action="Index" asp-route-filter="Pending" asp-route-search="@search"
+                       class="filter-pill @(activeFilter == "Pending" ? "active" : "")">
+                        Pending <span class="badge bg-warning bg-opacity-20 text-warning-emphasis rounded-pill ms-1">@pendingCount</span>
+                    </a>
+                    <a asp-area="Student" asp-controller="Assignments" asp-action="Index" asp-route-filter="Submitted" asp-route-search="@search"
+                       class="filter-pill @(activeFilter == "Submitted" ? "active" : "")">
+                        Submitted <span class="badge bg-info bg-opacity-20 text-info rounded-pill ms-1">@submittedCount</span>
+                    </a>
+                    <a asp-area="Student" asp-controller="Assignments" asp-action="Index" asp-route-filter="Graded" asp-route-search="@search"
+                       class="filter-pill @(activeFilter == "Graded" ? "active" : "")">
+                        Graded <span class="badge bg-success bg-opacity-20 text-success rounded-pill ms-1">@gradedCount</span>
+                    </a>
+                    @if (overdueCount > 0)
+                    {
+                        <a asp-area="Student" asp-controller="Assignments" asp-action="Index" asp-route-filter="Overdue" asp-route-search="@search"
+                           class="filter-pill @(activeFilter == "Overdue" ? "active" : "")">
+                            Overdue <span class="badge bg-danger bg-opacity-20 text-danger rounded-pill ms-1">@overdueCount</span>
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <form method="get" asp-area="Student" asp-controller="Assignments" asp-action="Index" class="d-flex gap-2">
+                    <input type="hidden" name="filter" value="@activeFilter" />
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="search" value="@search" class="form-control bg-light border-start-0 rounded-end-pill" placeholder="Search by title or course..." />
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(search))
+                    {
+                        <a asp-area="Student" asp-controller="Assignments" asp-action="Index" asp-route-filter="@activeFilter" class="btn btn-outline-secondary rounded-pill">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Grid -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                var isOverdue = (item.SubmissionStatus == null || item.SubmissionStatus == SubmissionStatus.Pending) && item.DueDate < DateTime.UtcNow;
+                
+                <div class="col-md-6 col-lg-4">
+                    <div class="assignment-card">
+                        <div class="assignment-card-header d-flex align-items-center justify-content-between">
+                            <span class="course-badge text-truncate me-2" style="max-width: 70%;" title="@item.CourseTitle">
+                                <i class="bi bi-book me-1"></i> @item.CourseTitle
+                            </span>
+
+                            @if (item.SubmissionStatus == SubmissionStatus.Graded)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-semibold">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Graded
+                                </span>
+                            }
+                            else if (item.SubmissionStatus == SubmissionStatus.Submitted)
+                            {
+                                <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1 fw-semibold">
+                                    <i class="bi bi-clock-history me-1"></i> Submitted
+                                </span>
+                            }
+                            else if (isOverdue)
+                            {
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 fw-semibold">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Overdue
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1 fw-semibold">
+                                    <i class="bi bi-hourglass-split me-1"></i> Pending
+                                </span>
+                            }
+                        </div>
+
+                        <div class="assignment-card-body">
+                            <h5 class="fw-bold text-dark mb-2">@item.Title</h5>
+                            <p class="text-secondary small mb-3 line-clamp-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                @(string.IsNullOrWhiteSpace(item.Description) ? "No detailed instructions provided." : item.Description)
+                            </p>
+
+                            <div class="d-flex align-items-center justify-content-between p-2 rounded-3 bg-light text-muted small">
+                                <div>
+                                    <i class="bi bi-calendar-event text-primary me-1"></i>
+                                    <span>Due: <strong>@item.DueDate.ToString("MMM dd, yyyy")</strong></span>
+                                </div>
+                                @if (item.Marks.HasValue)
+                                {
+                                    <div class="fw-semibold text-success">
+                                        <i class="bi bi-award me-1"></i> Score: @item.Marks pts
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="assignment-card-footer d-flex align-items-center justify-content-between">
+                            <span class="small text-muted">
+                                @if (item.SubmittedAt.HasValue)
+                                {
+                                    <i class="bi bi-check2-all text-success me-1"></i>
+                                    <span>Sent @item.SubmittedAt.Value.ToString("MMM dd")</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-circle text-warning me-1"></i>
+                                    <span>Not Submitted</span>
+                                }
+                            </span>
+                            <a asp-area="Student" asp-controller="Assignments" asp-action="Details" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                Details <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 rounded-4 shadow-sm py-5 text-center my-4">
+            <div class="card-body">
+                <div class="display-4 text-muted mb-3">
+                    <i class="bi bi-file-earmark-x"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">No Assignments Found</h4>
+                <p class="text-secondary mb-4" style="max-width: 480px; margin: 0 auto;">
+                    @if (!string.IsNullOrWhiteSpace(search) || activeFilter != "All")
+                    {
+                        <span>No assignments match your filter or search query. Try clearing your search filters.</span>
+                    }
+                    else
+                    {
+                        <span>You currently have no assignments assigned in your enrolled courses. Check back later or explore more courses.</span>
+                    }
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    @if (!string.IsNullOrWhiteSpace(search) || activeFilter != "All")
+                    {
+                        <a asp-area="Student" asp-controller="Assignments" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
+                            Clear Filters
+                        </a>
+                    }
+                    <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btn btn-primary rounded-pill px-4">
+                        My Courses <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

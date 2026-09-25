@@ -1,0 +1,140 @@
+@model LearningManagementSystem.Application.DTOs.Certificates.CertificateDto
+@{
+    ViewData["Title"] = "Certificate - " + Model.CourseTitle;
+    Layout = "_StudentLayout";
+}
+
+<style>
+    .diploma-card {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 3.5rem 3rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border: 12px solid #ffffff;
+        outline: 2px solid rgba(86, 36, 208, 0.2);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    .diploma-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 20rem;
+        color: rgba(86, 36, 208, 0.03);
+        pointer-events: none;
+        user-select: none;
+    }
+    .diploma-brand {
+        font-weight: 800;
+        font-size: 1.6rem;
+        color: var(--lms-primary);
+        letter-spacing: -0.5px;
+    }
+    .diploma-header-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        background: var(--lms-gradient);
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        box-shadow: 0 6px 20px rgba(86, 36, 208, 0.25);
+    }
+    .btn-gradient {
+        background: var(--lms-gradient);
+        color: white !important;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    .btn-gradient:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(86, 36, 208, 0.3);
+    }
+
+    @@media print {
+        header, footer, .no-print, .student-nav {
+            display: none !important;
+        }
+        .diploma-card {
+            box-shadow: none !important;
+            border: 4px solid #5624d0 !important;
+            outline: none !important;
+            margin: 0 !important;
+            padding: 2rem !important;
+        }
+        body {
+            background: white !important;
+        }
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Back Navigation -->
+    <div class="mb-3 no-print">
+        <a asp-area="Student" asp-controller="Certificate" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Certificates
+        </a>
+    </div>
+
+    <!-- Certificate Diploma Frame -->
+    <div class="diploma-card text-center position-relative mx-auto" style="max-width: 900px;">
+        <i class="bi bi-award-fill diploma-watermark"></i>
+        
+        <div class="position-relative" style="z-index: 2;">
+            <!-- Brand & Icon -->
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                <div class="diploma-header-icon">
+                    <i class="bi bi-mortarboard-fill"></i>
+                </div>
+            </div>
+            <div class="diploma-brand mb-1">AI SKILLS ACADEMY</div>
+            <p class="text-uppercase text-muted fw-semibold small mb-4" style="letter-spacing: 2px;">Official Certificate of Completion</p>
+
+            <hr class="my-4 mx-auto opacity-25" style="max-width: 300px; border-top: 2px solid var(--lms-primary);" />
+
+            <p class="text-muted fs-6 mb-2">This is to certify that</p>
+            <h1 class="fw-bold text-dark display-5 mb-3" style="font-family: 'Poppins', sans-serif;">@Model.StudentName</h1>
+            <p class="text-muted fs-6 mb-3">has successfully completed the official course</p>
+
+            <div class="p-3 rounded-4 bg-light d-inline-block px-4 mb-4 border border-light">
+                <h3 class="fw-bold text-primary mb-0">@Model.CourseTitle</h3>
+            </div>
+
+            <div class="row align-items-center justify-content-center text-start g-4 mt-2" style="max-width: 600px; margin: 0 auto;">
+                <div class="col-sm-6 text-center text-sm-start">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="letter-spacing: 1px;">Issued Date</small>
+                    <span class="fw-bold text-dark fs-6">@Model.IssuedDate.ToString("MMMM dd, yyyy")</span>
+                </div>
+                <div class="col-sm-6 text-center text-sm-end">
+                    <small class="text-muted d-block text-uppercase fw-semibold" style="letter-spacing: 1px;">Certificate Number</small>
+                    <span class="fw-bold text-dark fs-6 font-monospace">@Model.CertificateNumber</span>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-3 d-flex align-items-center justify-content-center gap-4 flex-wrap">
+                <div class="d-inline-flex align-items-center gap-2 text-success bg-success bg-opacity-10 px-3 py-2 rounded-pill small fw-semibold">
+                    <i class="bi bi-patch-check-fill fs-5"></i>
+                    <span>Verified Authentic Credential</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="text-center no-print mt-4">
+        <a asp-area="Student" asp-controller="Certificate" asp-action="Download" asp-route-id="@Model.Id" class="btn btn-gradient rounded-pill px-4 py-2 fw-semibold me-2">
+            <i class="bi bi-file-earmark-pdf me-2"></i> Download PDF
+        </a>
+        <button onclick="window.print()" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold me-2">
+            <i class="bi bi-printer me-2"></i> Print
+        </button>
+        <a asp-area="Student" asp-controller="Certificate" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Back to Certificates
+        </a>
+    </div>
+</div>

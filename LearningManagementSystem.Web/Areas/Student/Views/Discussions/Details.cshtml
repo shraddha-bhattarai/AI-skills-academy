@@ -1,0 +1,58 @@
+@model LearningManagementSystem.Application.DTOs.Discussions.DiscussionDetailsDto
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "_StudentLayout";
+}
+
+<style>
+    .thread-box {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(86, 36, 208, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .reply-item {
+        border-left: 3px solid rgba(86, 36, 208, 0.15);
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        background: #f8fafc;
+        border-radius: 0 12px 12px 0;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-area="Student" asp-controller="Discussions" asp-action="Index" asp-route-courseId="@Model.CourseId" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Discussions
+        </a>
+    </div>
+
+    <div class="thread-box">
+        <h3 class="fw-bold text-dark mb-1">@Model.Title</h3>
+        <p class="text-muted small mb-3">Posted by @Model.StudentName &middot; @Model.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</p>
+        <p class="text-secondary" style="white-space: pre-line;">@Model.Content</p>
+    </div>
+
+    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-reply-all me-2 text-primary"></i>@Model.Replies.Count Repl@(Model.Replies.Count == 1 ? "y" : "ies")</h5>
+
+    @foreach (var reply in Model.Replies)
+    {
+        <div class="reply-item">
+            <p class="mb-1 fw-semibold small text-dark">@reply.StudentName <span class="text-muted fw-normal">&middot; @reply.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</span></p>
+            <p class="mb-0 text-secondary" style="white-space: pre-line;">@reply.Content</p>
+        </div>
+    }
+
+    <div class="thread-box mt-4">
+        <h6 class="fw-bold text-dark mb-3">Post a Reply</h6>
+        <form asp-area="Student" asp-controller="Discussions" asp-action="Reply" method="post">
+            <input type="hidden" name="DiscussionId" value="@Model.Id" />
+            <textarea name="Content" class="form-control mb-3" rows="3" placeholder="Write your reply..." required></textarea>
+            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                <i class="bi bi-send me-1"></i> Reply
+            </button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,135 @@
+@model LearningManagementSystem.Web.Models.HomeIndexViewModel
+@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Learn AI through practice";
+}
+
+<div class="academy-home">
+    <nav class="navbar navbar-expand-xl navbar-dark landing-nav" id="landingNavbar" aria-label="Main navigation">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                <span class="brand-icon" aria-hidden="true">AI</span><span class="brand-name">AI Skills Academy</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#landingNavMenu"
+                    aria-controls="landingNavMenu" aria-expanded="false" aria-label="Open menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="landingNavMenu">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link active" asp-area="" asp-controller="Home" asp-action="Index" aria-current="page">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Categories" asp-action="Index">Topics</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="About">About</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-2">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        var dashboardArea = User.IsInRole("Admin") ? "Admin" : "Student";
+                        <a class="btn btn-nav-register" asp-area="@dashboardArea" asp-controller="Home" asp-action="Index">Dashboard</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-nav-login" asp-area="" asp-controller="Account" asp-action="Login">Log in</a>
+                        <a class="btn btn-nav-register" asp-area="" asp-controller="Account" asp-action="Register">Join free</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero-section academy-hero">
+            <div class="container">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-7 hero-content">
+                        <span class="hero-badge">START HERE · LEARN AT YOUR PACE</span>
+                        <h1 class="hero-title">AI makes more sense when you <span class="highlight">try it yourself.</span></h1>
+                        <p class="hero-subtitle">Short lessons, quick quizzes and small projects help you build useful AI skills, one step at a time.</p>
+                        <div class="d-flex flex-wrap gap-3 hero-actions">
+                            <a class="btn btn-gradient btn-lg" asp-area="" asp-controller="Courses" asp-action="Index">Explore courses <span aria-hidden="true">→</span></a>
+                            <a class="btn btn-outline-light-custom btn-lg" asp-area="" asp-controller="Home" asp-action="About">How it works</a>
+                        </div>
+                        <p class="hero-small">@Model.TotalPublishedCourses published course@(Model.TotalPublishedCourses == 1 ? "" : "s") · @Model.TotalStudents learner@(Model.TotalStudents == 1 ? "" : "s") · learn on your schedule</p>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="academy-preview" aria-label="Example learning path">
+                            <div class="preview-top"><span class="preview-mark">AI</span><span>YOUR LEARNING PATH</span><span class="preview-dots">● ● ●</span></div>
+                            <div class="preview-body">
+                                <span class="preview-label">FIRST STEPS</span>
+                                <h2>Learn, try, check.</h2>
+                                <p>Build confidence through simple tasks and clear feedback.</p>
+                                <div class="preview-row"><span class="preview-number">01</span><span>Learn the idea</span><span aria-hidden="true">✓</span></div>
+                                <div class="preview-row"><span class="preview-number">02</span><span>Practice with a prompt</span><span aria-hidden="true">↗</span></div>
+                                <div class="preview-row"><span class="preview-number">03</span><span>Check what you learned</span><span aria-hidden="true">○</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="academy-search" aria-label="Find a course">
+            <div class="container">
+                <form id="courseSearchForm" class="academy-search-form" method="get" asp-area="" asp-controller="Courses" asp-action="Index" role="search">
+                    <label for="searchQuery">Find your next lesson</label>
+                    <div class="academy-search-controls">
+                        <input id="searchQuery" name="search" type="search" placeholder="Try AI, prompts, or machine learning" />
+                        <button type="submit">Search courses <span aria-hidden="true">→</span></button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="academy-section" id="courses">
+            <div class="container">
+                <div class="academy-section-head">
+                    <div><span class="eyebrow">EXPLORE</span><h2>Start with a course</h2><p>Pick a topic that fits what you want to learn.</p></div>
+                    <a asp-area="" asp-controller="Courses" asp-action="Index" class="academy-text-link">All courses <span aria-hidden="true">→</span></a>
+                </div>
+                <div class="row g-4">
+                    @if (!Model.FeaturedCourses.Any())
+                    {
+                        <div class="col-12"><p class="academy-empty">Courses will appear here when an administrator publishes them.</p></div>
+                    }
+                    @foreach (var course in Model.FeaturedCourses)
+                    {
+                        <div class="col-md-6 col-xl-4"><partial name="_CourseCard" model="course" /></div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="academy-section academy-section-soft">
+            <div class="container">
+                <div class="academy-section-head"><div><span class="eyebrow">YOUR ROUTE</span><h2>A simple way to learn</h2><p>Make progress you can see.</p></div></div>
+                <div class="row g-4">
+                    <div class="col-md-4"><div class="academy-step"><span>01</span><h3>Choose a course</h3><p>Browse the topics and join the course that interests you.</p></div></div>
+                    <div class="col-md-4"><div class="academy-step"><span>02</span><h3>Practice each lesson</h3><p>Read, try the examples and mark lessons as complete.</p></div></div>
+                    <div class="col-md-4"><div class="academy-step"><span>03</span><h3>Check your progress</h3><p>Take a quiz, submit a project and review your results.</p></div></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="academy-section academy-topics">
+            <div class="container">
+                <div class="academy-section-head"><div><span class="eyebrow">TOPICS</span><h2>Follow your curiosity</h2><p>Explore the areas available in the academy.</p></div><a class="academy-text-link" asp-area="" asp-controller="Categories" asp-action="Index">All topics <span aria-hidden="true">→</span></a></div>
+                <div class="row g-3">
+                    @if (!Model.Categories.Any())
+                    {
+                        <div class="col-12"><p class="academy-empty">Topics will appear here when they are added.</p></div>
+                    }
+                    @foreach (var category in Model.Categories)
+                    {
+                        <div class="col-md-6 col-lg-4"><a class="academy-topic" asp-area="" asp-controller="Categories" asp-action="Details" asp-route-id="@category.Id"><span class="academy-topic-icon">✦</span><span><strong>@category.Name</strong><small>@category.CourseCount course@(category.CourseCount == 1 ? "" : "s")</small></span><span aria-hidden="true">↗</span></a></div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="academy-cta">
+            <div class="container"><div class="row align-items-center g-4"><div class="col-lg-8"><span class="eyebrow">READY TO BEGIN?</span><h2>Your first AI lesson is a click away.</h2><p>Join, choose a course and learn at your own pace.</p></div><div class="col-lg-4 text-lg-end"><a class="btn btn-gradient btn-lg" asp-area="" asp-controller="Account" asp-action="Register">Create your free account <span aria-hidden="true">→</span></a></div></div></div>
+        </section>
+    </main>
+    <partial name="_Footer" />
+</div>

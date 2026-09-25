@@ -1,0 +1,58 @@
+@model CreateLessonDto
+@{
+    ViewData["Title"] = "Create Lesson";
+}
+
+<div class="container py-4">
+    <h1><i class="bi bi-plus-circle me-2"></i>Create Lesson</h1>
+    <hr />
+
+    <form asp-area="Admin" asp-controller="Lessons" asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="CourseId" class="form-label"></label>
+            <select asp-for="CourseId" asp-items="ViewBag.CourseId" class="form-select">
+                <option value="">-- Select Course --</option>
+            </select>
+            <span asp-validation-for="CourseId" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label"></label>
+            <textarea asp-for="Content" class="form-control" rows="6"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="VideoUrl" class="form-label"></label>
+            <input asp-for="VideoUrl" class="form-control" />
+            <span asp-validation-for="VideoUrl" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="NotesUrl" class="form-label"></label>
+            <input asp-for="NotesUrl" class="form-control" />
+            <span asp-validation-for="NotesUrl" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-1"></i>Create
+            </button>
+            <a asp-area="Admin" asp-controller="Lessons" asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

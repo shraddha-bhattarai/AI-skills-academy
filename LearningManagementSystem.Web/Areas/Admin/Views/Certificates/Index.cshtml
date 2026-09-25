@@ -1,0 +1,403 @@
+@model PagedResult<CertificateDto>
+@{
+    ViewData["Title"] = "Certificates";
+    var search = ViewBag.Search as string;
+    var sortBy = ViewBag.SortBy as string;
+    var sortDescending = ViewBag.SortDescending is bool desc && desc;
+}
+
+@section Styles {
+<style>
+    .admin-certificates-header {
+        background: linear-gradient(135deg, #5624d0 0%, #7c3aed 50%, #a435f0 100%);
+        border-radius: var(--lms-radius, 16px);
+        padding: 2.25rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(86, 36, 208, 0.15);
+    }
+
+    .admin-certificates-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .admin-certificates-header h1 {
+        font-weight: 800;
+        font-size: 1.85rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .admin-certificates-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .filter-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-card .form-control {
+        border-radius: 10px;
+        font-size: 0.9rem;
+        padding: 0.55rem 0.9rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .filter-card .form-control:focus {
+        border-color: var(--lms-primary, #5624d0);
+        box-shadow: 0 0 0 3px rgba(86, 36, 208, 0.15);
+    }
+
+    .btn-filter {
+        background: var(--lms-gradient, linear-gradient(135deg, #5624d0, #7c3aed));
+        color: #fff;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.55rem 1.25rem;
+        border: none;
+        transition: var(--lms-transition, all 0.3s ease);
+    }
+
+    .btn-filter:hover {
+        opacity: 0.92;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .btn-reset {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0.55rem 1rem;
+        color: var(--lms-muted, #6a6f73);
+        background: #f1f5f9;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-reset:hover {
+        background: #e2e8f0;
+        color: var(--lms-dark, #1c1d1f);
+    }
+
+    .table-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .certificates-table {
+        margin-bottom: 0;
+    }
+
+    .certificates-table thead th {
+        background: #f8fafc;
+        color: var(--lms-muted, #6a6f73);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #edf2f7;
+        white-space: nowrap;
+    }
+
+    .certificates-table thead th a {
+        color: inherit;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .certificates-table thead th a:hover {
+        color: var(--lms-primary, #5624d0);
+    }
+
+    .certificates-table tbody td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
+    }
+
+    .certificates-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .certificates-table tbody tr:hover td {
+        background-color: #fafbfc;
+    }
+
+    .avatar-initials {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .student-name-text {
+        font-weight: 600;
+        color: var(--lms-dark, #1c1d1f);
+        font-size: 0.92rem;
+    }
+
+    .course-title-text {
+        font-weight: 600;
+        color: var(--lms-dark, #1c1d1f);
+        font-size: 0.9rem;
+        max-width: 250px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cert-number-badge {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.78rem;
+        font-weight: 600;
+        background: rgba(86, 36, 208, 0.08);
+        color: var(--lms-primary-dark, #401b9c);
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        display: inline-block;
+        max-width: 160px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .action-btn-group {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.4rem;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: var(--lms-transition, all 0.2s ease);
+        border: 1px solid transparent;
+    }
+
+    .action-btn-view {
+        color: var(--lms-primary, #5624d0);
+        background: rgba(86, 36, 208, 0.08);
+    }
+
+    .action-btn-view:hover {
+        background: var(--lms-primary, #5624d0);
+        color: #fff;
+    }
+
+    .action-btn-delete {
+        color: #c93357;
+        background: rgba(245, 87, 108, 0.12);
+    }
+
+    .action-btn-delete:hover {
+        background: #c93357;
+        color: #fff;
+    }
+
+    .empty-certificates {
+        text-align: center;
+        padding: 4rem 1.5rem;
+        color: var(--lms-muted, #6a6f73);
+    }
+
+    .empty-certificates i {
+        font-size: 3rem;
+        color: #cbd5e1;
+        display: block;
+        margin-bottom: 1rem;
+    }
+</style>
+}
+
+<div class="container py-4">
+
+    @* ── Header Banner ── *@
+    <div class="admin-certificates-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="position-relative">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge rounded-pill bg-white text-dark px-3 py-1 fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                    <i class="bi bi-award-fill me-1 text-primary"></i> Certificate Management
+                </span>
+            </div>
+            <h1>Certificates</h1>
+            <p>View and manage certificates earned by students.</p>
+        </div>
+        <a asp-area="Admin" asp-controller="Certificates" asp-action="Create" class="btn btn-light fw-semibold" style="border-radius: 10px; padding: 0.65rem 1.5rem;">
+            <i class="bi bi-plus-lg me-1"></i> New Certificate
+        </a>
+    </div>
+
+    @* ── Search Bar Card ── *@
+    <div class="filter-card">
+        <form method="get" asp-area="Admin" asp-controller="Certificates" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-lg-8 col-md-7">
+                <label for="search" class="form-label small fw-semibold text-muted mb-1">Search Certificates</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="search" name="search" value="@search" class="form-control border-start-0 ps-0" placeholder="Search by student name, course title, or certificate number..." />
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-5 d-flex gap-2">
+                <button type="submit" class="btn btn-filter flex-grow-1">
+                    <i class="bi bi-search me-1"></i> Search
+                </button>
+                @if (!string.IsNullOrWhiteSpace(search) || !string.IsNullOrWhiteSpace(sortBy))
+                {
+                    <a asp-area="Admin" asp-controller="Certificates" asp-action="Index" class="btn btn-reset" title="Clear Search">
+                        <i class="bi bi-x-circle me-1"></i> Reset
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    @* ── Certificates Table Card ── *@
+    <div class="table-card">
+        @if (Model.Items.Any())
+        {
+            <div class="table-responsive">
+                <table class="table certificates-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Certificates" asp-action="Index"
+                                   asp-route-sortBy="course"
+                                   asp-route-sortDescending="@(sortBy == "course" ? !sortDescending : false)"
+                                   asp-route-search="@search">
+                                    Course
+                                    @if (sortBy == "course")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>Certificate Number</th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Certificates" asp-action="Index"
+                                   asp-route-sortBy="issueddate"
+                                   asp-route-sortDescending="@(sortBy == "issueddate" ? !sortDescending : false)"
+                                   asp-route-search="@search">
+                                    Issued Date
+                                    @if (sortBy == "issueddate")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cert in Model.Items)
+                        {
+                            var studentDisplay = string.IsNullOrWhiteSpace(cert.StudentName) ? cert.StudentId : cert.StudentName;
+                            var initials = string.Concat(
+                                studentDisplay.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                              .Select(p => p[0].ToString()))
+                                .Take(2);
+                            var avatarText = string.Concat(initials).ToUpper();
+                            if (string.IsNullOrWhiteSpace(avatarText)) avatarText = "S";
+
+                            var colors = new[] { "#5624d0", "#43e97b", "#fa709a", "#4facfe", "#f093fb", "#fc5c7d", "#7c3aed" };
+                            var avatarColor = colors[Math.Abs(cert.StudentId.GetHashCode()) % colors.Length];
+
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-initials" style="background: @avatarColor">
+                                            @avatarText
+                                        </div>
+                                        <div>
+                                            <div class="student-name-text">@studentDisplay</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="course-title-text" title="@cert.CourseTitle">
+                                        <i class="bi bi-journal-bookmark text-primary me-1"></i> @cert.CourseTitle
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="cert-number-badge" title="@cert.CertificateNumber">@cert.CertificateNumber</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted small">@cert.IssuedDate.ToString("MMM d, yyyy")</span>
+                                </td>
+                                <td>
+                                    <div class="action-btn-group">
+                                        <a asp-area="Admin" asp-controller="Certificates" asp-action="Details" asp-route-id="@cert.Id"
+                                           class="action-btn action-btn-view" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Certificates" asp-action="Download" asp-route-id="@cert.Id"
+                                           class="action-btn action-btn-view" title="Download PDF">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Certificates" asp-action="Edit" asp-route-id="@cert.Id"
+                                           class="action-btn action-btn-view" title="Edit Certificate">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Certificates" asp-action="Delete" asp-route-id="@cert.Id"
+                                           class="action-btn action-btn-delete" title="Delete Certificate">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @* Pagination *@
+            <div class="p-3 border-top">
+                <partial name="_Pagination" model="Model" />
+            </div>
+        }
+        else
+        {
+            <div class="empty-certificates">
+                <i class="bi bi-award"></i>
+                <h5 class="fw-bold text-dark mb-1">No Certificates Found</h5>
+                <p class="text-muted mb-0">No student certificates match your current search criteria.</p>
+            </div>
+        }
+    </div>
+
+</div>

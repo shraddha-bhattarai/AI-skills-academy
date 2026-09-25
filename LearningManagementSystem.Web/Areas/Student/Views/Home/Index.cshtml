@@ -1,0 +1,398 @@
+@model LearningManagementSystem.Web.Areas.Student.ViewModels.StudentDashboardViewModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<!-- 1. HERO / WELCOME SECTION -->
+<section class="hero-section dashboard-hero" style="padding: 3rem 0 4rem; min-height: auto; border-radius: 0 0 24px 24px;">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7 hero-content">
+                <div class="hero-badge">
+                    <i class="bi bi-stars"></i> Student Dashboard
+                </div>
+                <h1 class="hero-title">
+                    Welcome back, <span class="highlight">@Model.StudentName</span>!
+                </h1>
+                <p class="hero-subtitle">
+                    @Model.GreetingSubtitle
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btn btn-gradient btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>My Courses
+                    </a>
+                    @if (Model.ContinueLearning != null)
+                    {
+                        <a href="#continue-learning" class="btn btn-outline-light-custom btn-lg">
+                            Continue Learning
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-area="" asp-controller="Courses" asp-action="Index" class="btn btn-outline-light-custom btn-lg">
+                            Browse Courses
+                        </a>
+                    }
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat"><i class="bi bi-check-circle-fill"></i> @Model.Stats.EnrolledCourses Courses Enrolled</div>
+                    <div class="hero-stat"><i class="bi bi-check-circle-fill"></i> @Model.Stats.CompletedCourses Completed</div>
+                    <div class="hero-stat"><i class="bi bi-check-circle-fill"></i> @Model.LearningProgress.LessonsCompletedThisWeek Lessons This Week</div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="academy-preview">
+                    <div class="preview-top"><span class="preview-mark">AI</span><span>YOUR PROGRESS</span></div>
+                    <div class="preview-body">
+                        <span class="preview-label">KEEP GOING</span>
+                        <h2>@Model.LearningProgress.TotalLessonsCompleted lessons done</h2>
+                        <p>Keep learning at your pace. Your work is saved in the academy.</p>
+                        <div class="preview-row"><span class="preview-number">01</span><span>@Model.Stats.EnrolledCourses courses joined</span></div>
+                        <div class="preview-row"><span class="preview-number">02</span><span>@Model.LearningProgress.LessonsCompletedThisWeek lessons this week</span></div>
+                        <div class="preview-row"><span class="preview-number">03</span><span>@Model.Stats.CertificatesEarned certificates earned</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 2. LEARNING STATISTICS -->
+<section class="section-padding bg-soft">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Overview</span>
+            <h2 class="section-title">Your Learning Stats</h2>
+            <p class="section-desc">Track your course progress, upcoming tasks, and achievements at a glance.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-sm-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #5624d0, #7c3aed);">
+                        <i class="bi bi-journal-bookmark-fill"></i>
+                    </div>
+                    <h5>@Model.Stats.EnrolledCourses</h5>
+                    <p>Enrolled Courses</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h5>@Model.Stats.CompletedCourses</h5>
+                    <p>Completed Courses</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h5>@Model.Stats.PendingAssignments</h5>
+                    <p>Pending Assignments</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <i class="bi bi-award-fill"></i>
+                    </div>
+                    <h5>@Model.Stats.CertificatesEarned</h5>
+                    <p>Certificates Earned</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. CONTINUE LEARNING -->
+@if (Model.ContinueLearning != null)
+{
+    <section class="section-padding" id="continue-learning">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Resume</span>
+                <h2 class="section-title">Continue Learning</h2>
+                <p class="section-desc">Pick up right where you left off in your active course.</p>
+            </div>
+            <div class="feature-card text-start p-4 p-md-5">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-5">
+                        <div class="course-img rounded-4 overflow-hidden shadow-sm" style="aspect-ratio: 16/10;">
+                            @if (string.IsNullOrWhiteSpace(Model.ContinueLearning.ImageUrl))
+                            {
+                                <div class="course-img-fallback" aria-hidden="true"><span>AI</span><span>Learn by doing</span></div>
+                            }
+                            else
+                            {
+                                <img src="@Model.ContinueLearning.ImageUrl" alt="" class="w-100 h-100 object-fit-cover" />
+                            }
+                        </div>
+                    </div>
+                    <div class="col-lg-7">
+                        <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 rounded-pill mb-2">
+                            @Model.ContinueLearning.Category
+                        </span>
+                        <h3 class="fw-bold text-dark mb-3">@Model.ContinueLearning.Title</h3>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-1 small">
+                                <span class="fw-semibold text-dark">Course Progress</span>
+                                <span class="fw-bold text-primary">@Model.ContinueLearning.ProgressPercentage%</span>
+                            </div>
+                            <div class="progress" style="height: 8px; border-radius: 50px; background-color: #e9ecef;">
+                                <div class="progress-bar" style="width: @Model.ContinueLearning.ProgressPercentage%; background: var(--lms-gradient); border-radius: 50px;"></div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2 small text-muted">
+                                <span><i class="bi bi-journal-text me-1"></i> @Model.ContinueLearning.CompletedLessons of @Model.ContinueLearning.TotalLessons Lessons</span>
+                                @if (!string.IsNullOrWhiteSpace(Model.ContinueLearning.NextLessonTitle))
+                                {
+                                    <span><i class="bi bi-play-circle me-1"></i> Next: @Model.ContinueLearning.NextLessonTitle</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a asp-area="Student" asp-controller="Lessons" asp-action="Index" asp-route-courseId="@Model.ContinueLearning.CourseId" class="btn btn-gradient">
+                                <i class="bi bi-play-fill me-1"></i> Resume Course
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+<!-- 4. MY COURSES -->
+<section class="section-padding bg-soft">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-label">Enrolled</span>
+            <h2 class="section-title">My Courses</h2>
+            <p class="section-desc">Access your ongoing courses and track progress across subjects.</p>
+        </div>
+        @if (Model.EnrolledCourses.Any())
+        {
+            <div class="row g-4">
+                @foreach (var course in Model.EnrolledCourses)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <article class="course-card">
+                            <div class="course-img">
+                                @if (string.IsNullOrWhiteSpace(course.ImageUrl))
+                                {
+                                    <div class="course-img-fallback" aria-hidden="true"><span>AI</span><span>Learn by doing</span></div>
+                                }
+                                else
+                                {
+                                    <img src="@course.ImageUrl" alt="" loading="lazy" />
+                                }
+                                <span class="course-badge">@course.Category</span>
+                            </div>
+                            <div class="course-body">
+                                <h3 class="course-title">@course.Title</h3>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
+                                        <span>@course.CompletedLessons/@course.TotalLessons lessons</span>
+                                        <span class="fw-bold text-primary">@course.ProgressPercentage%</span>
+                                    </div>
+                                    <div class="progress" style="height: 6px; border-radius: 50px; background-color: #e9ecef;">
+                                        <div class="progress-bar" style="width: @course.ProgressPercentage%; background: var(--lms-gradient); border-radius: 50px;"></div>
+                                    </div>
+                                </div>
+                                <div class="course-footer">
+                                    <a asp-area="Student" asp-controller="Lessons" asp-action="Index" asp-route-courseId="@course.CourseId" class="btn-enroll w-100 text-center">Open Course</a>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+            <div class="text-center mt-5">
+                <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btn btn-outline-primary-custom btn-lg">
+                    View All Enrolled Courses
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="feature-card text-center p-5">
+                <i class="bi bi-journal-x text-muted" style="font-size: 3rem;"></i>
+                <h4 class="fw-bold text-dark mt-3 mb-2">No Courses Yet</h4>
+                <p class="text-muted mb-4">You haven't enrolled in any courses yet. Browse the catalog to get started.</p>
+                <a asp-area="" asp-controller="Courses" asp-action="Index" class="btn btn-gradient btn-lg">
+                    <i class="bi bi-search me-2"></i>Browse Courses
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- 5. UPCOMING ASSIGNMENTS & 6. AVAILABLE QUIZZES -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <span class="section-label mb-1">Tasks</span>
+                        <h3 class="fw-bold mb-0 text-dark">Upcoming Assignments</h3>
+                    </div>
+                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">@Model.UpcomingAssignments.Count Pending</span>
+                </div>
+                <div class="d-flex flex-column gap-3">
+                    @if (Model.UpcomingAssignments.Any())
+                    {
+                        @foreach (var assignment in Model.UpcomingAssignments)
+                        {
+                            <div class="feature-card text-start p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h5 class="fw-bold text-dark mb-1">@assignment.Title</h5>
+                                        <span class="badge bg-light text-secondary border">@assignment.CourseTitle</span>
+                                    </div>
+                                    <span class="badge @assignment.PriorityClass px-3 py-1 rounded-pill">@assignment.Status</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top small text-muted">
+                                    <div>
+                                        <i class="bi bi-calendar-event me-1"></i> Due: <strong>@assignment.DueDate.ToString("MMM dd, yyyy")</strong>
+                                    </div>
+                                    <a asp-area="Student" asp-controller="Assignments" asp-action="Details" asp-route-id="@assignment.AssignmentId" class="btn btn-sm btn-outline-primary-custom">
+                                        View Task
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="feature-card text-center p-4 text-muted">
+                            <i class="bi bi-check2-circle me-1"></i> No pending assignments right now.
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <span class="section-label mb-1">Assessments</span>
+                        <h3 class="fw-bold mb-0 text-dark">Available Quizzes</h3>
+                    </div>
+                    <span class="badge bg-info text-dark px-3 py-2 rounded-pill">@Model.AvailableQuizzes.Count Available</span>
+                </div>
+                <div class="d-flex flex-column gap-3">
+                    @if (Model.AvailableQuizzes.Any())
+                    {
+                        @foreach (var quiz in Model.AvailableQuizzes)
+                        {
+                            <div class="feature-card text-start p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h5 class="fw-bold text-dark mb-1">@quiz.Title</h5>
+                                        <span class="badge bg-light text-secondary border">@quiz.CourseTitle</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top small text-muted">
+                                    <div>
+                                        <i class="bi bi-list-check me-1"></i> <strong>@quiz.TotalQuestions Questions</strong>
+                                    </div>
+                                    <a asp-area="Student" asp-controller="Quiz" asp-action="Details" asp-route-id="@quiz.QuizId" class="btn btn-sm btn-gradient">
+                                        Start Quiz
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="feature-card text-center p-4 text-muted">
+                            <i class="bi bi-check2-circle me-1"></i> No quizzes available right now.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 7. LEARNING PROGRESS & 8. RECENT ACTIVITY -->
+<section class="section-padding bg-soft">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="mb-4">
+                    <span class="section-label mb-1">Analytics</span>
+                    <h3 class="fw-bold mb-0 text-dark">Learning Progress</h3>
+                </div>
+                <div class="feature-card text-start p-4">
+                    <div class="row align-items-center">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <div class="display-5 fw-bold text-primary mb-1">@Model.LearningProgress.OverallProgressPercentage%</div>
+                            <div class="text-muted small">Average Course Completion</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 bg-light rounded-3">
+                                <div class="d-flex justify-content-between mb-1 small text-muted">
+                                    <span>Lessons This Week:</span>
+                                    <strong class="text-dark">@Model.LearningProgress.LessonsCompletedThisWeek</strong>
+                                </div>
+                                <div class="d-flex justify-content-between small text-muted">
+                                    <span>Total Lessons Completed:</span>
+                                    <strong class="text-dark">@Model.LearningProgress.TotalLessonsCompleted</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="mb-4">
+                    <span class="section-label mb-1">Timeline</span>
+                    <h3 class="fw-bold mb-0 text-dark">Recent Activity</h3>
+                </div>
+                <div class="feature-card text-start p-4">
+                    @if (Model.RecentActivities.Any())
+                    {
+                        <div class="d-flex flex-column gap-3">
+                            @foreach (var activity in Model.RecentActivities)
+                            {
+                                <div class="p-3 rounded-3 bg-light border d-flex align-items-center gap-3">
+                                    <div class="rounded-circle p-2 text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: var(--lms-gradient);">
+                                        <i class="bi @activity.IconClass fs-5"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="badge bg-white text-primary border small">@activity.ActivityType</span>
+                                            <span class="small text-muted"><i class="bi bi-clock me-1"></i>@activity.TimeStamp.ToString("MMM dd, HH:mm")</span>
+                                        </div>
+                                        <div class="fw-semibold text-dark small">@activity.Title</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-3">
+                            <i class="bi bi-clock-history me-1"></i> No recent activity yet. Complete a lesson or assignment to see it here.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 9. MOTIVATIONAL CTA -->
+<section class="section-padding">
+    <div class="container">
+        <div class="cta-section">
+            <h2>Keep Building Your Skills Every Day</h2>
+            <p>Consistency is key to mastering new technologies and advancing your professional career.</p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a asp-area="" asp-controller="Courses" asp-action="Index" class="btn-white">Browse Courses</a>
+                <a asp-area="Student" asp-controller="Assignments" asp-action="Index" class="btn-outline-white">View Assignments</a>
+            </div>
+        </div>
+    </div>
+</section>

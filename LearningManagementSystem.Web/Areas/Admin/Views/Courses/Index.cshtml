@@ -1,0 +1,559 @@
+@model PagedResult<CourseDto>
+@{
+    ViewData["Title"] = "Courses";
+    var search = ViewBag.Search as string;
+    var categoryId = ViewBag.CategoryId as int?;
+    var level = ViewBag.Level as int?;
+    var sortBy = ViewBag.SortBy as string;
+    var sortDescending = ViewBag.SortDescending is bool desc && desc;
+    var categories = ViewBag.CategoryList as IReadOnlyList<LookupItemDto> ?? new List<LookupItemDto>();
+}
+
+@section Styles {
+<style>
+    .admin-courses-header {
+        background: linear-gradient(135deg, #5624d0 0%, #7c3aed 50%, #a435f0 100%);
+        border-radius: var(--lms-radius, 16px);
+        padding: 2.25rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(86, 36, 208, 0.15);
+    }
+
+    .admin-courses-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .admin-courses-header h1 {
+        font-weight: 800;
+        font-size: 1.85rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .admin-courses-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .btn-create-course {
+        background: #fff;
+        color: var(--lms-primary, #5624d0);
+        font-weight: 700;
+        border-radius: 12px;
+        padding: 0.65rem 1.4rem;
+        font-size: 0.9rem;
+        border: none;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+        transition: var(--lms-transition, all 0.3s ease);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-create-course:hover {
+        background: #f8f9fa;
+        color: var(--lms-primary-dark, #401b9c);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Filter & Search Bar */
+    .filter-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-card .form-control,
+    .filter-card .form-select {
+        border-radius: 10px;
+        font-size: 0.9rem;
+        padding: 0.55rem 0.9rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .filter-card .form-control:focus,
+    .filter-card .form-select:focus {
+        border-color: var(--lms-primary, #5624d0);
+        box-shadow: 0 0 0 3px rgba(86, 36, 208, 0.15);
+    }
+
+    .btn-filter {
+        background: var(--lms-gradient, linear-gradient(135deg, #5624d0, #7c3aed));
+        color: #fff;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.55rem 1.25rem;
+        border: none;
+        transition: var(--lms-transition, all 0.3s ease);
+    }
+
+    .btn-filter:hover {
+        opacity: 0.92;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .btn-reset {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0.55rem 1rem;
+        color: var(--lms-muted, #6a6f73);
+        background: #f1f5f9;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-reset:hover {
+        background: #e2e8f0;
+        color: var(--lms-dark, #1c1d1f);
+    }
+
+    /* Courses Table Card */
+    .table-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .courses-table {
+        margin-bottom: 0;
+    }
+
+    .courses-table thead th {
+        background: #f8fafc;
+        color: var(--lms-muted, #6a6f73);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #edf2f7;
+        white-space: nowrap;
+    }
+
+    .courses-table thead th a {
+        color: inherit;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .courses-table thead th a:hover {
+        color: var(--lms-primary, #5624d0);
+    }
+
+    .courses-table tbody td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
+    }
+
+    .courses-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .courses-table tbody tr:hover td {
+        background-color: #fafbfc;
+    }
+
+    .course-thumb {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        object-fit: cover;
+        background-color: #e2e8f0;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .course-thumb-fallback {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(86, 36, 208, 0.1), rgba(124, 58, 237, 0.15));
+        color: var(--lms-primary, #5624d0);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+    }
+
+    .course-title-text {
+        font-weight: 600;
+        color: var(--lms-dark, #1c1d1f);
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 0.92rem;
+    }
+
+    .course-desc-text {
+        color: var(--lms-muted, #6a6f73);
+        font-size: 0.78rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* Badges */
+    .badge-category {
+        background: rgba(86, 36, 208, 0.08);
+        color: var(--lms-primary, #5624d0);
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+    }
+
+    .level-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.7rem;
+        border-radius: 50px;
+    }
+
+    .level-beginner {
+        background: rgba(67, 233, 123, 0.15);
+        color: #1a9c53;
+    }
+
+    .level-intermediate {
+        background: rgba(250, 173, 20, 0.15);
+        color: #b57c00;
+    }
+
+    .level-advanced {
+        background: rgba(245, 87, 108, 0.15);
+        color: #c93357;
+    }
+
+    .status-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.7rem;
+        border-radius: 50px;
+    }
+
+    .status-published {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .status-draft {
+        background: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+    }
+
+    .status-archived {
+        background: rgba(107, 114, 128, 0.15);
+        color: #4b5563;
+    }
+
+    .action-btn-group {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.4rem;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: var(--lms-transition, all 0.2s ease);
+        border: 1px solid transparent;
+    }
+
+    .action-btn-view {
+        color: var(--lms-primary, #5624d0);
+        background: rgba(86, 36, 208, 0.08);
+    }
+
+    .action-btn-view:hover {
+        background: var(--lms-primary, #5624d0);
+        color: #fff;
+    }
+
+    .action-btn-edit {
+        color: #b57c00;
+        background: rgba(250, 173, 20, 0.12);
+    }
+
+    .action-btn-edit:hover {
+        background: #b57c00;
+        color: #fff;
+    }
+
+    .action-btn-delete {
+        color: #c93357;
+        background: rgba(245, 87, 108, 0.12);
+    }
+
+    .action-btn-delete:hover {
+        background: #c93357;
+        color: #fff;
+    }
+
+    .empty-courses {
+        text-align: center;
+        padding: 4rem 1.5rem;
+        color: var(--lms-muted, #6a6f73);
+    }
+
+    .empty-courses i {
+        font-size: 3rem;
+        color: #cbd5e1;
+        display: block;
+        margin-bottom: 1rem;
+    }
+</style>
+}
+
+<div class="container py-4">
+
+    @* ── Header Banner ── *@
+    <div class="admin-courses-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="position-relative">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge rounded-pill bg-white text-dark px-3 py-1 fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                    <i class="bi bi-shield-lock-fill me-1 text-primary"></i> Course Management
+                </span>
+            </div>
+            <h1>Courses</h1>
+            <p>Manage and organize all courses available on AI Skills Academy.</p>
+        </div>
+        <div class="position-relative">
+            <a asp-area="Admin" asp-controller="Courses" asp-action="Create" class="btn-create-course">
+                <i class="bi bi-plus-lg"></i> Create Course
+            </a>
+        </div>
+    </div>
+
+    @* ── Filter & Search Card ── *@
+    <div class="filter-card">
+        <form method="get" asp-area="Admin" asp-controller="Courses" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-lg-4 col-md-6">
+                <label for="search" class="form-label small fw-semibold text-muted mb-1">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="search" name="search" value="@search" class="form-control border-start-0 ps-0" placeholder="Search courses..." />
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <label for="categoryId" class="form-label small fw-semibold text-muted mb-1">Category</label>
+                <select id="categoryId" name="categoryId" class="form-select">
+                    <option value="">All Categories</option>
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat.Id" selected="@(categoryId?.ToString() == cat.Id)">@cat.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-6">
+                <label for="level" class="form-label small fw-semibold text-muted mb-1">Level</label>
+                <select id="level" name="level" class="form-select">
+                    <option value="">All Levels</option>
+                    <option value="1" selected="@(level == 1)">Beginner</option>
+                    <option value="2" selected="@(level == 2)">Intermediate</option>
+                    <option value="3" selected="@(level == 3)">Advanced</option>
+                </select>
+            </div>
+
+            <div class="col-lg-3 col-md-6 d-flex gap-2">
+                <button type="submit" class="btn btn-filter flex-grow-1">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+                @if (!string.IsNullOrWhiteSpace(search) || categoryId.HasValue || level.HasValue || !string.IsNullOrWhiteSpace(sortBy))
+                {
+                    <a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="btn btn-reset" title="Clear Filters">
+                        <i class="bi bi-x-circle me-1"></i> Reset
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    @* ── Courses Data Table ── *@
+    <div class="table-card">
+        @if (Model.Items.Any())
+        {
+            <div class="table-responsive">
+                <table class="table courses-table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;">Media</th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Courses" asp-action="Index"
+                                   asp-route-sortBy="title"
+                                   asp-route-sortDescending="@(sortBy == "title" ? !sortDescending : false)"
+                                   asp-route-search="@search"
+                                   asp-route-categoryId="@categoryId"
+                                   asp-route-level="@level">
+                                    Course Title
+                                    @if (sortBy == "title")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Courses" asp-action="Index"
+                                   asp-route-sortBy="category"
+                                   asp-route-sortDescending="@(sortBy == "category" ? !sortDescending : false)"
+                                   asp-route-search="@search"
+                                   asp-route-categoryId="@categoryId"
+                                   asp-route-level="@level">
+                                    Category
+                                    @if (sortBy == "category")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>Level</th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Courses" asp-action="Index"
+                                   asp-route-sortBy="price"
+                                   asp-route-sortDescending="@(sortBy == "price" ? !sortDescending : false)"
+                                   asp-route-search="@search"
+                                   asp-route-categoryId="@categoryId"
+                                   asp-route-level="@level">
+                                    Price
+                                    @if (sortBy == "price")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>Status</th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Courses" asp-action="Index"
+                                   asp-route-sortBy="createdat"
+                                   asp-route-sortDescending="@(sortBy == "createdat" ? !sortDescending : false)"
+                                   asp-route-search="@search"
+                                   asp-route-categoryId="@categoryId"
+                                   asp-route-level="@level">
+                                    Created
+                                    @if (sortBy == "createdat")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var course in Model.Items)
+                        {
+                            var levelClass = course.Level == CourseLevel.Beginner ? "level-beginner"
+                                           : course.Level == CourseLevel.Intermediate ? "level-intermediate"
+                                           : "level-advanced";
+
+                            var statusClass = course.Status == CourseStatus.Published ? "status-published"
+                                            : course.Status == CourseStatus.Draft ? "status-draft"
+                                            : "status-archived";
+
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(course.ThumbnailUrl))
+                                    {
+                                        <img src="@course.ThumbnailUrl" alt="@course.Title" class="course-thumb"
+                                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'course-thumb-fallback\'><i class=\'bi bi-journal-bookmark-fill\'></i></div>';" />
+                                    }
+                                    else
+                                    {
+                                        <div class="course-thumb-fallback">
+                                            <i class="bi bi-journal-bookmark-fill"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="course-title-text" title="@course.Title">@course.Title</div>
+                                    <div class="course-desc-text" title="@course.Description">@course.Description</div>
+                                </td>
+                                <td>
+                                    <span class="badge-category">@course.CategoryName</span>
+                                </td>
+                                <td>
+                                    <span class="level-badge @levelClass">@course.Level</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-dark">@(course.Price == 0 ? "Free" : course.Price.ToString("C"))</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge @statusClass">@course.Status</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted small">@course.CreatedAt.ToString("MMM d, yyyy")</span>
+                                </td>
+                                <td>
+                                    <div class="action-btn-group">
+                                        <a asp-area="Admin" asp-controller="Courses" asp-action="Details" asp-route-id="@course.Id"
+                                           class="action-btn action-btn-view" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Courses" asp-action="Edit" asp-route-id="@course.Id"
+                                           class="action-btn action-btn-edit" title="Edit Course">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Courses" asp-action="Delete" asp-route-id="@course.Id"
+                                           class="action-btn action-btn-delete" title="Delete Course">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @* Pagination *@
+            <div class="p-3 border-top">
+                <partial name="_Pagination" model="Model" />
+            </div>
+        }
+        else
+        {
+            <div class="empty-courses">
+                <i class="bi bi-collection"></i>
+                <h5 class="fw-bold text-dark mb-1">No Courses Found</h5>
+                <p class="text-muted mb-3">No courses match your current search or filter criteria.</p>
+                <a asp-area="Admin" asp-controller="Courses" asp-action="Create" class="btn btn-filter px-4">
+                    <i class="bi bi-plus-lg me-1"></i> Create New Course
+                </a>
+            </div>
+        }
+    </div>
+
+</div>

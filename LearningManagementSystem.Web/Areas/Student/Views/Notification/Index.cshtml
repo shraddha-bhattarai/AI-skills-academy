@@ -1,0 +1,252 @@
+@model IReadOnlyList<LearningManagementSystem.Application.DTOs.Notifications.NotificationDto>
+@using LearningManagementSystem.Domain.Enums
+@{
+    ViewData["Title"] = "Notifications - AI Skills Academy Student Portal";
+    Layout = "_StudentLayout";
+
+    string activeFilter = ViewBag.ActiveFilter as string ?? "All";
+    int unreadCount = ViewBag.UnreadCount ?? 0;
+    int totalCount = ViewBag.TotalCount ?? Model.Count;
+}
+
+<style>
+    .notifications-hero {
+        background: linear-gradient(135deg, #1a0533 0%, #2d1b69 40%, #5624d0 75%, #7c3aed 100%);
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--lms-radius);
+        padding: 2.5rem 2rem;
+        color: #ffffff;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(86, 36, 208, 0.25);
+    }
+    .notifications-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 85% 15%, rgba(164, 53, 240, 0.35) 0%, transparent 60%);
+        pointer-events: none;
+    }
+    .notifications-hero .hero-content-wrap {
+        position: relative;
+        z-index: 2;
+    }
+    .notifications-hero .hero-badge {
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    .notifications-hero .stat-badge-card {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    .filter-pill {
+        border-radius: 50px;
+        padding: 0.5rem 1.25rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #4b5563;
+        background: #f3f4f6;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .filter-pill:hover, .filter-pill.active {
+        background: var(--lms-gradient);
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(86, 36, 208, 0.25);
+    }
+    .notif-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        transition: all 0.2s ease;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1rem;
+        position: relative;
+    }
+    .notif-card.unread {
+        border-left: 5px solid var(--lms-primary);
+        background: #ffffff;
+        box-shadow: 0 6px 20px rgba(86, 36, 208, 0.08);
+    }
+    .notif-card.read {
+        border-left: 5px solid transparent;
+        background: #fafafa;
+        opacity: 0.9;
+    }
+    .notif-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(86, 36, 208, 0.12);
+    }
+    .notif-icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+    .notif-icon-box.assignment { background: rgba(86, 36, 208, 0.1); color: var(--lms-primary); }
+    .notif-icon-box.quiz { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+    .notif-icon-box.course { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+    .notif-icon-box.general { background: rgba(107, 114, 128, 0.1); color: #4b5563; }
+    .empty-state-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        text-align: center;
+    }
+    .empty-icon-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(86, 36, 208, 0.1), rgba(164, 53, 240, 0.15));
+        color: var(--lms-primary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .btn-gradient {
+        background: var(--lms-gradient);
+        color: white !important;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    .btn-gradient:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(86, 36, 208, 0.3);
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Hero Banner -->
+    <div class="notifications-hero">
+        <div class="row align-items-center hero-content-wrap">
+            <div class="col-lg-8">
+                <span class="badge hero-badge rounded-pill px-3 py-2 mb-3 fw-semibold">
+                    <i class="bi bi-bell me-1"></i> Activity Updates
+                </span>
+                <h1 class="fw-bold mb-2 text-white">Notifications</h1>
+                <p class="mb-0 text-white fs-6" style="opacity: 0.95;">
+                    Stay updated with course announcements, assignment deadlines, and quiz alerts.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <div class="d-inline-flex align-items-center stat-badge-card rounded-4 p-3">
+                    <i class="bi bi-envelope-open-fill fs-1 text-white me-3"></i>
+                    <div class="text-start">
+                        <div class="fs-4 fw-bold text-white mb-0">@unreadCount</div>
+                        <small class="text-white fw-medium" style="opacity: 0.9;">Unread Updates</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Bar & Actions -->
+    <div class="bg-white rounded-4 p-3 mb-4 shadow-sm border border-light d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-area="Student" asp-controller="Notification" asp-action="Index" asp-route-filter="All"
+               class="filter-pill @(activeFilter == "All" ? "active" : "")">
+                All <span class="badge bg-secondary bg-opacity-20 text-dark rounded-pill ms-1">@totalCount</span>
+            </a>
+            <a asp-area="Student" asp-controller="Notification" asp-action="Index" asp-route-filter="Unread"
+               class="filter-pill @(activeFilter == "Unread" ? "active" : "")">
+                Unread <span class="badge bg-warning bg-opacity-20 text-warning-emphasis rounded-pill ms-1">@unreadCount</span>
+            </a>
+            <a asp-area="Student" asp-controller="Notification" asp-action="Index" asp-route-filter="Read"
+               class="filter-pill @(activeFilter == "Read" ? "active" : "")">
+                Read
+            </a>
+        </div>
+        @if (unreadCount > 0)
+        {
+            <form asp-area="Student" asp-controller="Notification" asp-action="MarkAllAsRead" method="post" class="m-0">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-check2-all me-1"></i> Mark All as Read
+                </button>
+            </form>
+        }
+    </div>
+
+    <!-- Notifications List -->
+    @if (Model.Any())
+    {
+        <div class="notif-list">
+            @foreach (var item in Model)
+            {
+                var iconClass = item.Type switch
+                {
+                    NotificationType.Assignment => "assignment bi-file-earmark-check-fill",
+                    NotificationType.Quiz => "quiz bi-patch-question-fill",
+                    NotificationType.Course => "course bi-journal-bookmark-fill",
+                    _ => "general bi-bell-fill"
+                };
+
+                <div class="notif-card @(item.IsRead ? "read" : "unread") d-flex align-items-start gap-3">
+                    <div class="notif-icon-box @iconClass">
+                        <i class="bi"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+                            <div class="d-flex align-items-center gap-2">
+                                <h6 class="mb-0 fw-bold @(item.IsRead ? "text-dark" : "text-primary")">@item.Title</h6>
+                                @if (!item.IsRead)
+                                {
+                                    <span class="badge bg-primary rounded-pill px-2 py-1 small" style="font-size: 0.7rem;">NEW</span>
+                                }
+                            </div>
+                            <small class="text-muted fw-medium"><i class="bi bi-clock me-1"></i>@item.CreatedAt.ToString("MMM dd, yyyy • hh:mm tt")</small>
+                        </div>
+                        <p class="text-secondary small mb-2 text-break">@item.Message</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <a asp-area="Student" asp-controller="Notification" asp-action="Details" asp-route-id="@item.Id"
+                               class="btn btn-sm btn-link p-0 text-decoration-none fw-semibold">
+                                View Details <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                            @if (!item.IsRead)
+                            {
+                                <span class="text-muted small">•</span>
+                                <form asp-area="Student" asp-controller="Notification" asp-action="MarkAsRead" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-link p-0 text-muted text-decoration-none small">
+                                        Mark as read
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="empty-state-card">
+            <div class="empty-icon-circle">
+                <i class="bi bi-bell-slash"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-2">No Notifications</h3>
+            <p class="text-muted mb-0 mx-auto" style="max-width: 480px;">
+                You're all caught up. New updates about your courses, assignments, and learning activities will appear here.
+            </p>
+        </div>
+    }
+</div>

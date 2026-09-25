@@ -1,0 +1,332 @@
+@inject LearningManagementSystem.Application.Interfaces.Services.INotificationService _adminNavNotifService
+@inject Microsoft.AspNetCore.Identity.UserManager<LearningManagementSystem.Persistence.Identity.ApplicationUser> _adminNavUserManager
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AI Skills Academy Admin Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/landing.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+    <style>
+        /* ── Admin Portal Navbar ──────────────────────────────────────── */
+        .admin-nav {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid rgba(86, 36, 208, 0.08);
+            padding: 0.75rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1050;
+        }
+        .admin-nav .navbar-brand {
+            font-weight: 800;
+            font-size: 1.45rem;
+            color: var(--lms-primary) !important;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+        .admin-nav .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--lms-gradient);
+            color: white;
+            font-size: 1.1rem;
+            margin-right: 0.5rem;
+        }
+        .admin-nav .nav-link {
+            font-weight: 500;
+            font-size: 0.92rem;
+            color: var(--lms-dark) !important;
+            padding: 0.45rem 0.75rem !important;
+            border-radius: 8px;
+            transition: var(--lms-transition);
+            white-space: nowrap;
+        }
+        .admin-nav .nav-link:hover,
+        .admin-nav .nav-link.active {
+            color: var(--lms-primary) !important;
+            background-color: rgba(86, 36, 208, 0.06);
+        }
+        .admin-nav .dropdown-menu {
+            border-radius: 12px;
+            padding: 0.4rem;
+            min-width: 200px;
+        }
+        /* Too many top-level nav items to fit one row on real desktop widths —
+           scroll horizontally instead of wrapping or letting flex shrink the links. */
+        @@media (min-width: 992px) {
+            .admin-nav .navbar-collapse {
+                flex-wrap: nowrap;
+                min-width: 0;
+            }
+            .admin-nav .navbar-nav {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                overflow-y: hidden;
+                white-space: nowrap;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(86, 36, 208, 0.35) transparent;
+                padding-bottom: 2px;
+            }
+            .admin-nav .navbar-nav .nav-item {
+                flex-shrink: 0;
+            }
+            .admin-nav .navbar-nav::-webkit-scrollbar {
+                height: 5px;
+            }
+            .admin-nav .navbar-nav::-webkit-scrollbar-thumb {
+                background: rgba(86, 36, 208, 0.3);
+                border-radius: 10px;
+            }
+            .admin-nav .d-flex.align-items-center.gap-2.flex-wrap {
+                flex-shrink: 0;
+            }
+        }
+        .admin-nav .dropdown-item {
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            padding: 0.5rem 0.85rem;
+            transition: var(--lms-transition);
+        }
+        .admin-nav .dropdown-item:hover {
+            background: rgba(86, 36, 208, 0.06);
+            color: var(--lms-primary);
+        }
+        /* Admin role badge */
+        .admin-role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: linear-gradient(135deg, rgba(86,36,208,0.1), rgba(124,58,237,0.15));
+            color: var(--lms-primary-dark);
+            border-radius: 50px;
+            padding: 0.2rem 0.65rem;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+        /* User badge */
+        .admin-user-badge {
+            background: linear-gradient(135deg, rgba(86, 36, 208, 0.08), rgba(124, 58, 237, 0.12));
+            color: var(--lms-primary-dark);
+            border-radius: 50px;
+            padding: 0.4rem 1rem;
+            font-weight: 600;
+            font-size: 0.88rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-logout {
+            background: rgba(236, 82, 82, 0.1);
+            color: #d93838;
+            font-weight: 600;
+            border-radius: 50px;
+            padding: 0.45rem 1.1rem;
+            border: 1px solid rgba(236, 82, 82, 0.2);
+            transition: var(--lms-transition);
+            font-size: 0.9rem;
+        }
+        .btn-logout:hover {
+            background: #d93838;
+            color: white;
+        }
+        /* Main content area */
+        .admin-main-content {
+            padding-top: var(--lms-nav-height);
+            min-height: calc(100vh - 120px);
+            background-color: #f8fafc;
+        }
+        /* Admin footer */
+        .admin-footer {
+            background: #fff;
+            border-top: 1px solid rgba(86, 36, 208, 0.08);
+            padding: 1.25rem 0;
+            text-align: center;
+            font-size: 0.82rem;
+            color: var(--lms-muted);
+        }
+        .admin-footer .footer-brand {
+            color: var(--lms-primary);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="landing-page">
+    @{
+        var _adminArea       = ViewContext.RouteData.Values["area"]?.ToString() ?? "";
+        var _adminController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+        var _adminAction     = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    }
+
+    <header>
+        <nav class="navbar navbar-expand-lg admin-nav" id="adminNavbar">
+            <div class="container-fluid px-4">
+
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="Admin" asp-controller="Home" asp-action="Index">
+                    <span class="brand-icon" aria-hidden="true"><i class="bi bi-shield-lock-fill"></i></span>
+                    AI Skills Academy
+                    <span class="admin-role-badge ms-1"><i class="bi bi-shield-check-fill"></i> Admin</span>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavMenu"
+                        aria-controls="adminNavMenu" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="adminNavMenu">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Home" && _adminAction == "Index" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Courses" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Courses" asp-action="Index">
+                                <i class="bi bi-collection me-1"></i> Courses
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Categories" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Categories" asp-action="Index">
+                                <i class="bi bi-grid-3x3-gap me-1"></i> Categories
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Enrollments" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Enrollments" asp-action="Index">
+                                <i class="bi bi-person-check me-1"></i> Enrollments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Assignments" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Assignments" asp-action="Index">
+                                <i class="bi bi-file-earmark-text me-1"></i> Assignments
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Quizzes" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Quizzes" asp-action="Index">
+                                <i class="bi bi-patch-question me-1"></i> Quizzes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Lessons" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Lessons" asp-action="Index">
+                                <i class="bi bi-play-circle me-1"></i> Lessons
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Submissions" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Submissions" asp-action="Index">
+                                <i class="bi bi-clipboard-check me-1"></i> Submissions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Certificates" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Certificates" asp-action="Index">
+                                <i class="bi bi-award me-1"></i> Certificates
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Users" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Users" asp-action="Index">
+                                <i class="bi bi-people me-1"></i> Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Reports" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Reports" asp-action="Index">
+                                <i class="bi bi-bar-chart-line me-1"></i> Reports
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle @(_adminArea == "Admin" && (_adminController == "Discussions" || _adminController == "AiTools") ? "active" : "")"
+                               href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-grid me-1"></i> More
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="Discussions" asp-action="Index">
+                                        <i class="bi bi-chat-left-text me-1"></i> Discussions
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-area="Admin" asp-controller="AiTools" asp-action="Index">
+                                        <i class="bi bi-robot me-1"></i> AI Tools
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            @{
+                                var _adminNavUser = await _adminNavUserManager.GetUserAsync(User);
+                                int _adminUnreadCount = 0;
+                                if (_adminNavUser != null)
+                                {
+                                    _adminUnreadCount = await _adminNavNotifService.GetUnreadCountAsync(_adminNavUser.Id);
+                                }
+                            }
+                            <a class="nav-link @(_adminArea == "Admin" && _adminController == "Notifications" ? "active" : "")"
+                               asp-area="Admin" asp-controller="Notifications" asp-action="Index">
+                                <i class="bi bi-bell me-1"></i> Notifications
+                                @if (_adminUnreadCount > 0)
+                                {
+                                    <span class="badge rounded-pill ms-1" style="background: var(--lms-primary); color: white; font-size: 0.68rem; padding: 0.2em 0.5em; vertical-align: middle;">@_adminUnreadCount</span>
+                                }
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="admin-user-badge">
+                            <i class="bi bi-person-circle fs-6"></i>
+                            <span>@(User.Identity?.Name ?? "Admin")</span>
+                        </div>
+                        <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-logout">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="admin-main-content">
+        <partial name="_AlertMessages" />
+        @RenderBody()
+    </main>
+
+    <footer class="admin-footer mt-5">
+        <div class="container">
+            <span class="footer-brand"><i class="bi bi-shield-lock-fill me-1"></i> AI Skills Academy Admin Portal</span>
+            &nbsp;&mdash;&nbsp;&copy; @DateTime.UtcNow.Year AI Skills Academy. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/landing.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

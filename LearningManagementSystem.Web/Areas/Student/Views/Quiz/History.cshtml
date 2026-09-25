@@ -1,0 +1,183 @@
+@model IReadOnlyList<LearningManagementSystem.Web.Areas.Student.ViewModels.QuizHistoryItemViewModel>
+@{
+    ViewData["Title"] = "My Quiz Results - AI Skills Academy Student Portal";
+    Layout = "_StudentLayout";
+    int totalAttempts = Model?.Count ?? 0;
+    int passedCount = Model?.Count(a => a.IsPassed) ?? 0;
+}
+
+<style>
+    .history-hero {
+        background: linear-gradient(135deg, var(--lms-primary-dark) 0%, var(--lms-primary) 50%, var(--lms-secondary) 100%);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(86, 36, 208, 0.2);
+    }
+    .stat-card-custom {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+    }
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    .history-table-card {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .history-table thead th {
+        background: #f8fafc;
+        color: var(--lms-muted, #6a6f73);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #edf2f7;
+    }
+    .history-table tbody td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .history-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Hero Banner -->
+    <div class="history-hero">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-2 mb-3 fw-semibold">
+                    <i class="bi bi-clock-history me-1"></i> Assessment History
+                </span>
+                <h1 class="fw-bold mb-2 text-white">My Quiz Results</h1>
+                <p class="mb-0 text-white opacity-90 fs-6">
+                    Every quiz you've taken, with your score and pass/fail outcome, saved permanently.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <a asp-area="Student" asp-controller="Quiz" asp-action="Index" class="btn btn-light rounded-pill px-4 fw-semibold">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Quizzes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-journal-check"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@totalAttempts</h4>
+                    <span class="text-muted small fw-medium">Total Attempts</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-trophy"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@passedCount</h4>
+                    <span class="text-muted small fw-medium">Passed</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning-emphasis">
+                    <i class="bi bi-patch-exclamation"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@(totalAttempts - passedCount)</h4>
+                    <span class="text-muted small fw-medium">Needs Improvement</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="history-table-card">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table history-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Quiz</th>
+                            <th>Course</th>
+                            <th>Score</th>
+                            <th>Result</th>
+                            <th>Attempted</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var attempt in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold text-dark">@attempt.QuizTitle</td>
+                                <td class="text-muted">@attempt.CourseTitle</td>
+                                <td>@attempt.Score / @attempt.TotalMarks <span class="text-muted small">(@attempt.Percentage%)</span></td>
+                                <td>
+                                    @if (attempt.IsPassed)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+                                            <i class="bi bi-check-circle-fill me-1"></i> Passed
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">
+                                            <i class="bi bi-x-circle me-1"></i> Failed
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-muted small">@attempt.AttemptedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                <td class="text-end">
+                                    <a asp-area="Student" asp-controller="Quiz" asp-action="Result" asp-route-id="@attempt.AttemptId"
+                                       class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="bi bi-eye me-1"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <div class="display-4 text-muted mb-3">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">No Quiz Attempts Yet</h4>
+                <p class="text-secondary mb-4">Take a quiz to start building your results history.</p>
+                <a asp-area="Student" asp-controller="Quiz" asp-action="Index" class="btn btn-primary rounded-pill px-4">
+                    <i class="bi bi-patch-question me-1"></i> Browse Quizzes
+                </a>
+            </div>
+        }
+    </div>
+</div>

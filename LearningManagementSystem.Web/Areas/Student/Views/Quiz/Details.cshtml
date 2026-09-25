@@ -1,0 +1,173 @@
+@model LearningManagementSystem.Web.Areas.Student.ViewModels.StudentQuizDetailsViewModel
+@{
+    ViewData["Title"] = Model.Title + " - Quiz Overview";
+    Layout = "_StudentLayout";
+}
+
+<style>
+    .details-hero {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        margin-bottom: 2rem;
+    }
+    .param-tile {
+        background: #f8fafc;
+        border-radius: 16px;
+        padding: 1.25rem;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Back Link -->
+    <div class="mb-3">
+        <a asp-area="Student" asp-controller="Quiz" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to Quizzes
+        </a>
+    </div>
+
+    <!-- Notifications -->
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm p-3 mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5 align-middle"></i>
+            <span>@TempData["Error"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Hero / Title -->
+    <div class="details-hero text-center text-lg-start">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <div class="mb-2">
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-semibold">
+                        <i class="bi bi-book me-1"></i> @Model.CourseTitle
+                    </span>
+                </div>
+                <h2 class="fw-bold text-dark mb-2">@Model.Title</h2>
+                <p class="text-secondary mb-0">
+                    Prepare yourself before attempting this assessment. Make sure you have a stable internet connection.
+                </p>
+            </div>
+            <div class="col-lg-4 text-center text-lg-end">
+                <a asp-area="Student" asp-controller="Quiz" asp-action="Take" asp-route-id="@Model.QuizId"
+                   class="btn btn-primary btn-lg rounded-pill px-4 py-3 fw-bold shadow-sm">
+                    <i class="bi bi-play-circle-fill me-2"></i> Start Quiz Now
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameter Stats Grid -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="param-tile">
+                <div class="text-primary mb-2 display-6">
+                    <i class="bi bi-list-check"></i>
+                </div>
+                <small class="text-muted d-block fw-medium">Questions</small>
+                <h4 class="fw-bold text-dark mb-0">@Model.QuestionCount</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="param-tile">
+                <div class="text-warning mb-2 display-6">
+                    <i class="bi bi-stopwatch"></i>
+                </div>
+                <small class="text-muted d-block fw-medium">Time Limit</small>
+                <h4 class="fw-bold text-dark mb-0">~@Model.EstimatedDurationMinutes mins</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="param-tile">
+                <div class="text-success mb-2 display-6">
+                    <i class="bi bi-award"></i>
+                </div>
+                <small class="text-muted d-block fw-medium">Total Marks</small>
+                <h4 class="fw-bold text-dark mb-0">@Model.TotalMarks pts</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="param-tile">
+                <div class="text-info mb-2 display-6">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <small class="text-muted d-block fw-medium">Pass Threshold</small>
+                <h4 class="fw-bold text-dark mb-0">@Model.PassingMarks pts (50%)</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions & Guidelines Card -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4">
+        <h4 class="fw-bold text-dark mb-3 pb-2 border-bottom">
+            <i class="bi bi-info-circle me-2 text-primary"></i> Quiz Instructions & Guidelines
+        </h4>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Timed Assessment</h6>
+                        <p class="text-secondary small mb-0">
+                            An automatic countdown timer will run during the quiz. Please monitor your time remaining on the top bar.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="p-2 bg-success bg-opacity-10 text-success rounded-3">
+                        <i class="bi bi-check2-circle fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Single Choice Selection</h6>
+                        <p class="text-secondary small mb-0">
+                            Select one option (A, B, C, or D) for each question. You can review and modify your choices before submitting.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="p-2 bg-warning bg-opacity-10 text-warning rounded-3">
+                        <i class="bi bi-shield-check fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Server Verification</h6>
+                        <p class="text-secondary small mb-0">
+                            Answers will be evaluated securely on the server upon submission. Scores and feedback will be displayed immediately.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="p-2 bg-info bg-opacity-10 text-info rounded-3">
+                        <i class="bi bi-arrow-repeat fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Submission Confirmation</h6>
+                        <p class="text-secondary small mb-0">
+                            Ensure you click "Submit Quiz" once finished. Once submitted, your score will be stored for your progress records.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top text-center text-lg-end">
+            <a asp-area="Student" asp-controller="Quiz" asp-action="Take" asp-route-id="@Model.QuizId"
+               class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow-sm">
+                <i class="bi bi-play-circle-fill me-2"></i> Start Quiz
+            </a>
+        </div>
+    </div>
+</div>

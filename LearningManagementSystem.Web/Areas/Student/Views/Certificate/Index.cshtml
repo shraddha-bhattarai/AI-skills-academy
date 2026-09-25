@@ -1,0 +1,255 @@
+@model IReadOnlyList<LearningManagementSystem.Application.DTOs.Certificates.CertificateDto>
+@{
+    ViewData["Title"] = "My Certificates - AI Skills Academy Student Portal";
+    Layout = "_StudentLayout";
+
+    int totalCount = ViewBag.TotalCount ?? Model.Count;
+    int recentCount = ViewBag.RecentCount ?? 0;
+}
+
+<style>
+    .certificates-hero {
+        background: linear-gradient(135deg, #1a0533 0%, #2d1b69 40%, #5624d0 75%, #7c3aed 100%);
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--lms-radius);
+        padding: 2.5rem 2rem;
+        color: #ffffff;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(86, 36, 208, 0.25);
+    }
+    .certificates-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 85% 15%, rgba(164, 53, 240, 0.35) 0%, transparent 60%);
+        pointer-events: none;
+    }
+    .certificates-hero .hero-content-wrap {
+        position: relative;
+        z-index: 2;
+    }
+    .certificates-hero .hero-badge {
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+    .certificates-hero .stat-badge-card {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    .stat-card-custom {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stat-card-custom:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(86, 36, 208, 0.1);
+    }
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    .cert-card {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: all 0.25s ease;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .cert-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(86, 36, 208, 0.14);
+        border-color: rgba(86, 36, 208, 0.25);
+    }
+    .cert-header {
+        background: linear-gradient(135deg, rgba(86, 36, 208, 0.06), rgba(124, 58, 237, 0.12));
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(86, 36, 208, 0.08);
+    }
+    .cert-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+    .cert-footer {
+        padding: 1rem 1.5rem;
+        background-color: #fafafa;
+        border-top: 1px solid #f0f0f0;
+    }
+    .btn-gradient {
+        background: var(--lms-gradient);
+        color: white !important;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    .btn-gradient:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(86, 36, 208, 0.3);
+    }
+    .empty-state-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 4rem 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        text-align: center;
+    }
+    .empty-icon-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(86, 36, 208, 0.1), rgba(164, 53, 240, 0.15));
+        color: var(--lms-primary);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Hero Banner -->
+    <div class="certificates-hero">
+        <div class="row align-items-center hero-content-wrap">
+            <div class="col-lg-8">
+                <span class="badge hero-badge rounded-pill px-3 py-2 mb-3 fw-semibold">
+                    <i class="bi bi-award me-1"></i> Verified Achievements
+                </span>
+                <h1 class="fw-bold mb-2 text-white">Certificates</h1>
+                <p class="mb-0 text-white fs-6" style="opacity: 0.95;">
+                    Celebrate your achievements and showcase the skills you've earned through AI Skills Academy.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <div class="d-inline-flex align-items-center stat-badge-card rounded-4 p-3">
+                    <i class="bi bi-patch-check-fill fs-1 text-white me-3"></i>
+                    <div class="text-start">
+                        <div class="fs-4 fw-bold text-white mb-0">@totalCount</div>
+                        <small class="text-white fw-medium" style="opacity: 0.9;">Earned Certificates</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@totalCount</h4>
+                    <span class="text-muted small fw-medium">Total Earned</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@recentCount</h4>
+                    <span class="text-muted small fw-medium">Issued Last 30 Days</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">100%</h4>
+                    <span class="text-muted small fw-medium">Verified Credentials</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate List / Cards -->
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var cert in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="cert-card">
+                        <div class="cert-header d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-patch-check-fill fs-4 text-primary"></i>
+                                <span class="fw-bold text-dark fs-6">Certificate</span>
+                            </div>
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-semibold small">
+                                Verified
+                            </span>
+                        </div>
+                        <div class="cert-body">
+                            <h5 class="fw-bold text-dark mb-2">@cert.CourseTitle</h5>
+                            <p class="text-muted small mb-3">
+                                <i class="bi bi-person me-1 text-primary"></i> Issued to: <strong>@cert.StudentName</strong>
+                            </p>
+                            <div class="bg-light rounded-3 p-3 mb-2 small text-secondary">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span><i class="bi bi-hash me-1"></i> ID:</span>
+                                    <strong class="text-dark font-monospace text-truncate ms-2" style="max-width: 150px;" title="@cert.CertificateNumber">@cert.CertificateNumber</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span><i class="bi bi-calendar-check me-1"></i> Issued:</span>
+                                    <strong class="text-dark">@cert.IssuedDate.ToString("MMM dd, yyyy")</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cert-footer d-flex justify-content-between align-items-center">
+                            <a asp-area="Student" asp-controller="Certificate" asp-action="Details" asp-route-id="@cert.Id"
+                               class="btn btn-gradient btn-sm rounded-pill px-3 fw-medium">
+                                <i class="bi bi-eye me-1"></i> View Certificate
+                            </a>
+                            <a asp-area="Student" asp-controller="Certificate" asp-action="Download" asp-route-id="@cert.Id"
+                               class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-medium">
+                                <i class="bi bi-file-earmark-pdf me-1"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="empty-state-card">
+            <div class="empty-icon-circle">
+                <i class="bi bi-award"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-2">No Certificates Yet</h3>
+            <p class="text-muted mb-4 mx-auto" style="max-width: 480px;">
+                Complete your enrolled courses to earn certificates and showcase your achievements.
+            </p>
+            <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btn btn-gradient rounded-pill px-4 py-2 fw-semibold">
+                <i class="bi bi-compass me-2"></i> Browse Courses
+            </a>
+        </div>
+    }
+</div>

@@ -1,0 +1,62 @@
+@model IReadOnlyList<LearningManagementSystem.Application.DTOs.AiTools.AiToolDto>
+@{
+    ViewData["Title"] = "AI Tools";
+    Layout = "_StudentLayout";
+}
+
+<style>
+    .tool-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        height: 100%;
+        transition: all 0.2s ease;
+    }
+    .tool-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(86, 36, 208, 0.12);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark mb-1"><i class="bi bi-robot me-2 text-primary"></i>AI Tools Directory</h2>
+        <p class="text-muted mb-0">Discover AI tools curated to support your learning.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-robot" style="font-size: 3rem;"></i>
+            <p class="mt-3">No AI tools have been added yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var tool in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="tool-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="fw-bold text-dark mb-0">@tool.Name</h5>
+                            @if (!string.IsNullOrWhiteSpace(tool.Category))
+                            {
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">@tool.Category</span>
+                            }
+                        </div>
+                        <p class="text-secondary small mb-3">@tool.Description</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small"><i class="bi bi-hand-thumbs-up-fill text-success me-1"></i>@tool.UsefulCount found this useful</span>
+                            <a asp-area="Student" asp-controller="AiTools" asp-action="Details" asp-route-id="@tool.Id" class="btn btn-sm btn-primary rounded-pill">
+                                View <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,180 @@
+@model LearningManagementSystem.Web.Areas.Student.ViewModels.TakeQuizViewModel
+@{
+    ViewData["Title"] = "Taking Quiz: " + Model.Title;
+    Layout = "_StudentLayout";
+    int totalSeconds = Model.DurationMinutes * 60;
+}
+
+<style>
+    .sticky-quiz-header {
+        position: sticky;
+        top: 70px;
+        z-index: 1020;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(86, 36, 208, 0.12);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .question-card {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: border-color 0.2s ease;
+    }
+    .question-card:hover {
+        border-color: rgba(86, 36, 208, 0.2);
+    }
+    .option-wrapper {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.85rem 1.15rem;
+        margin-bottom: 0.65rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .option-wrapper:hover {
+        background-color: rgba(86, 36, 208, 0.04);
+        border-color: var(--lms-primary);
+    }
+    .option-wrapper input[type="radio"] {
+        width: 1.2rem;
+        height: 1.2rem;
+        accent-color: var(--lms-primary);
+        cursor: pointer;
+    }
+    .timer-badge {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        border-radius: 50px;
+        padding: 0.4rem 1.1rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Sticky Quiz Header & Countdown Bar -->
+    <div class="sticky-quiz-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-semibold mb-1">
+                <i class="bi bi-book me-1"></i> @Model.CourseTitle
+            </span>
+            <h4 class="fw-bold text-dark mb-0">@Model.Title</h4>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="timer-badge">
+                <i class="bi bi-stopwatch-fill"></i>
+                <span id="countdownTimer">--:--</span>
+            </div>
+            <button type="submit" form="quizForm" class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm" onclick="return confirm('Are you ready to submit your quiz?');">
+                <i class="bi bi-send-check me-1"></i> Submit Quiz
+            </button>
+        </div>
+    </div>
+
+    <!-- Quiz Form -->
+    <form asp-area="Student" asp-controller="Quiz" asp-action="Submit" asp-route-id="@Model.QuizId" method="post" id="quizForm">
+        @Html.AntiForgeryToken()
+
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var q = Model.Questions[i];
+            
+            <div class="question-card">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-bold">
+                        Question @(i + 1) of @Model.Questions.Count
+                    </span>
+                    <small class="text-muted fw-medium"><i class="bi bi-check-circle me-1"></i> Single Choice</small>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-3 fs-5">@q.QuestionText</h5>
+
+                <div class="options-container">
+                    <label class="option-wrapper w-100">
+                        <input type="radio" name="question_@q.QuestionId" value="OptionA" />
+                        <span class="fw-bold text-primary me-2">A.</span>
+                        <span class="text-dark">@q.OptionA</span>
+                    </label>
+
+                    <label class="option-wrapper w-100">
+                        <input type="radio" name="question_@q.QuestionId" value="OptionB" />
+                        <span class="fw-bold text-primary me-2">B.</span>
+                        <span class="text-dark">@q.OptionB</span>
+                    </label>
+
+                    <label class="option-wrapper w-100">
+                        <input type="radio" name="question_@q.QuestionId" value="OptionC" />
+                        <span class="fw-bold text-primary me-2">C.</span>
+                        <span class="text-dark">@q.OptionC</span>
+                    </label>
+
+                    <label class="option-wrapper w-100">
+                        <input type="radio" name="question_@q.QuestionId" value="OptionD" />
+                        <span class="fw-bold text-primary me-2">D.</span>
+                        <span class="text-dark">@q.OptionD</span>
+                    </label>
+                </div>
+            </div>
+        }
+
+        <!-- Bottom Submission Bar -->
+        <div class="card border-0 rounded-4 shadow-sm p-4 text-center my-4">
+            <h5 class="fw-bold text-dark mb-2">Reached the End of the Quiz</h5>
+            <p class="text-secondary mb-3">Double-check your selected choices before submitting.</p>
+            <div>
+                <button type="submit" class="btn btn-success btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg" onclick="return confirm('Are you sure you want to submit your quiz?');">
+                    <i class="bi bi-send-check-fill me-2"></i> Submit Quiz Answers
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            var timeRemaining = @totalSeconds;
+            var timerDisplay = document.getElementById("countdownTimer");
+            var quizForm = document.getElementById("quizForm");
+
+            function updateTimer() {
+                var minutes = Math.floor(timeRemaining / 60);
+                var seconds = timeRemaining % 60;
+
+                var formattedMin = minutes < 10 ? "0" + minutes : minutes;
+                var formattedSec = seconds < 10 ? "0" + seconds : seconds;
+
+                if (timerDisplay) {
+                    timerDisplay.textContent = formattedMin + ":" + formattedSec;
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(interval);
+                    alert("Time is up! Your quiz answers will be submitted automatically.");
+                    if (quizForm) {
+                        quizForm.submit();
+                    }
+                } else {
+                    timeRemaining--;
+                }
+            }
+
+            updateTimer();
+            var interval = setInterval(updateTimer, 1000);
+        })();
+    </script>
+}

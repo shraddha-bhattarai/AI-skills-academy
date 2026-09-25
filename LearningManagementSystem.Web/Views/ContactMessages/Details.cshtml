@@ -1,0 +1,45 @@
+@model ContactMessageDto
+@{
+    ViewData["Title"] = "Contact Message Details";
+}
+
+<h1><i class="bi bi-envelope me-2"></i>Contact Message Details</h1>
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-3">Name</dt>
+    <dd class="col-sm-9">@Model.Name</dd>
+
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9"><a href="mailto:@Model.Email">@Model.Email</a></dd>
+
+    <dt class="col-sm-3">Subject</dt>
+    <dd class="col-sm-9">@Model.Subject</dd>
+
+    <dt class="col-sm-3">Message</dt>
+    <dd class="col-sm-9">@Model.Message</dd>
+
+    <dt class="col-sm-3">Resolved</dt>
+    <dd class="col-sm-9">
+        @if (Model.IsResolved)
+        {
+            <span class="badge bg-success">Resolved</span>
+        }
+        else
+        {
+            <span class="badge bg-warning text-dark">Pending</span>
+        }
+    </dd>
+
+    <dt class="col-sm-3">Received At</dt>
+    <dd class="col-sm-9">@Model.CreatedAt.ToString("g")</dd>
+</dl>
+
+<div class="mt-3">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+        <i class="bi bi-pencil me-1"></i>Edit
+    </a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to List
+    </a>
+</div>

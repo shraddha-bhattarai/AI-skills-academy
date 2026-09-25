@@ -1,0 +1,65 @@
+@model LearningManagementSystem.Application.Common.IPagedResult
+
+@{
+    var search = ViewBag.Search as string;
+    var sortBy = ViewBag.SortBy as string;
+    var sortDescending = ViewBag.SortDescending is bool desc && desc;
+    var categoryId = ViewBag.CategoryId as int?;
+    var level = ViewBag.Level as int?;
+    var instructor = ViewBag.Instructor as string;
+    var status = ViewBag.Status;
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav aria-label="Page navigation" class="lms-pagination mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-page="@(Model.Page - 1)"
+                   asp-route-search="@search"
+                   asp-route-sortBy="@sortBy"
+                   asp-route-sortDescending="@sortDescending"
+                   asp-route-categoryId="@categoryId"
+                   asp-route-level="@level"
+                   asp-route-instructor="@instructor"
+                   asp-route-status="@status">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            @for (var i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-search="@search"
+                       asp-route-sortBy="@sortBy"
+                       asp-route-sortDescending="@sortDescending"
+                       asp-route-categoryId="@categoryId"
+                       asp-route-level="@level"
+                       asp-route-instructor="@instructor"
+                   asp-route-status="@status">@i</a>
+                </li>
+            }
+            <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                <a class="page-link"
+                   asp-action="Index"
+                   asp-route-page="@(Model.Page + 1)"
+                   asp-route-search="@search"
+                   asp-route-sortBy="@sortBy"
+                   asp-route-sortDescending="@sortDescending"
+                   asp-route-categoryId="@categoryId"
+                   asp-route-level="@level"
+                   asp-route-instructor="@instructor"
+                   asp-route-status="@status">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+        <p class="text-center text-muted small mb-0">
+            Page @Model.Page of @Model.TotalPages · @Model.TotalCount courses
+        </p>
+    </nav>
+}

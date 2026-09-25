@@ -1,0 +1,64 @@
+@model IReadOnlyList<CourseProgressReportItemViewModel>
+@{
+    ViewData["Title"] = "Course Progress Report";
+    var courses = ViewBag.Courses as IReadOnlyList<LookupItemDto> ?? new List<LookupItemDto>();
+    var courseId = ViewBag.CourseId as int?;
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Reports" asp-action="Index">Reports</a></li>
+            <li class="breadcrumb-item active">Course Progress</li>
+        </ol>
+    </nav>
+
+    <h1><i class="bi bi-graph-up me-2"></i>Course Progress Report</h1>
+
+    <form method="get" asp-area="Admin" asp-controller="Reports" asp-action="Progress" class="row g-2 mb-3 mt-2">
+        <div class="col-md-4">
+            <select name="courseId" class="form-select" onchange="this.form.submit()">
+                <option value="">All Courses</option>
+                @foreach (var c in courses)
+                {
+                    <option value="@c.Id" selected="@(courseId?.ToString() == c.Id)">@c.Name</option>
+                }
+            </select>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle bg-white rounded shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Course</th>
+                    <th>Lessons</th>
+                    <th>Enrolled Students</th>
+                    <th>Average Progress</th>
+                    <th>Completed (100%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-4">No courses found.</td></tr>
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.CourseTitle</td>
+                        <td>@item.TotalLessons</td>
+                        <td>@item.EnrolledStudents</td>
+                        <td style="min-width: 140px;">
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-primary" style="width: @item.AverageProgress%;"></div>
+                            </div>
+                            <span class="small text-muted">@item.AverageProgress.ToString("0.#")%</span>
+                        </td>
+                        <td>@item.CompletedCount / @item.EnrolledStudents</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

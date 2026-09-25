@@ -1,0 +1,530 @@
+@model PagedResult<NotificationDto>
+@{
+    ViewData["Title"] = "Notifications";
+    var search = ViewBag.Search as string;
+    var sortBy = ViewBag.SortBy as string;
+    var sortDescending = ViewBag.SortDescending is bool desc && desc;
+}
+
+@section Styles {
+<style>
+    .admin-notifications-header {
+        background: linear-gradient(135deg, #5624d0 0%, #7c3aed 50%, #a435f0 100%);
+        border-radius: var(--lms-radius, 16px);
+        padding: 2.25rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(86, 36, 208, 0.15);
+    }
+
+    .admin-notifications-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .admin-notifications-header h1 {
+        font-weight: 800;
+        font-size: 1.85rem;
+        margin-bottom: 0.35rem;
+    }
+
+    .admin-notifications-header p {
+        opacity: 0.9;
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .btn-create-notification {
+        background: #fff;
+        color: var(--lms-primary, #5624d0);
+        font-weight: 700;
+        border-radius: 12px;
+        padding: 0.65rem 1.4rem;
+        font-size: 0.9rem;
+        border: none;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+        transition: var(--lms-transition, all 0.3s ease);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .btn-create-notification:hover {
+        background: #f8f9fa;
+        color: var(--lms-primary-dark, #401b9c);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    }
+
+    .filter-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+
+    .filter-card .form-control {
+        border-radius: 10px;
+        font-size: 0.9rem;
+        padding: 0.55rem 0.9rem;
+        border: 1px solid #e2e8f0;
+    }
+
+    .filter-card .form-control:focus {
+        border-color: var(--lms-primary, #5624d0);
+        box-shadow: 0 0 0 3px rgba(86, 36, 208, 0.15);
+    }
+
+    .btn-filter {
+        background: var(--lms-gradient, linear-gradient(135deg, #5624d0, #7c3aed));
+        color: #fff;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.55rem 1.25rem;
+        border: none;
+        transition: var(--lms-transition, all 0.3s ease);
+    }
+
+    .btn-filter:hover {
+        opacity: 0.92;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .btn-reset {
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0.55rem 1rem;
+        color: var(--lms-muted, #6a6f73);
+        background: #f1f5f9;
+        border: none;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-reset:hover {
+        background: #e2e8f0;
+        color: var(--lms-dark, #1c1d1f);
+    }
+
+    .table-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .notifications-table {
+        margin-bottom: 0;
+    }
+
+    .notifications-table thead th {
+        background: #f8fafc;
+        color: var(--lms-muted, #6a6f73);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #edf2f7;
+        white-space: nowrap;
+    }
+
+    .notifications-table thead th a {
+        color: inherit;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .notifications-table thead th a:hover {
+        color: var(--lms-primary, #5624d0);
+    }
+
+    .notifications-table tbody td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
+    }
+
+    .notifications-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .notifications-table tbody tr:hover td {
+        background-color: #fafbfc;
+    }
+
+    .avatar-initials {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .recipient-name-text {
+        font-weight: 600;
+        color: var(--lms-dark, #1c1d1f);
+        font-size: 0.92rem;
+    }
+
+    .notification-title-text {
+        font-weight: 600;
+        color: var(--lms-dark, #1c1d1f);
+        font-size: 0.9rem;
+    }
+
+    .notification-message-preview {
+        color: var(--lms-muted, #6a6f73);
+        font-size: 0.8rem;
+        max-width: 280px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .type-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.7rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .type-general {
+        background: rgba(59, 130, 246, 0.12);
+        color: #2563eb;
+    }
+
+    .type-assignment {
+        background: rgba(245, 158, 11, 0.12);
+        color: #d97706;
+    }
+
+    .type-quiz {
+        background: rgba(139, 92, 246, 0.12);
+        color: #7c3aed;
+    }
+
+    .type-course {
+        background: rgba(16, 185, 129, 0.12);
+        color: #059669;
+    }
+
+    .read-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.65rem;
+        border-radius: 50px;
+    }
+
+    .read-badge-unread {
+        background: rgba(86, 36, 208, 0.12);
+        color: var(--lms-primary, #5624d0);
+    }
+
+    .read-badge-read {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .action-btn-group {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.4rem;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: var(--lms-transition, all 0.2s ease);
+        border: 1px solid transparent;
+    }
+
+    .action-btn-view {
+        color: var(--lms-primary, #5624d0);
+        background: rgba(86, 36, 208, 0.08);
+    }
+
+    .action-btn-view:hover {
+        background: var(--lms-primary, #5624d0);
+        color: #fff;
+    }
+
+    .action-btn-edit {
+        color: #b57c00;
+        background: rgba(250, 173, 20, 0.12);
+    }
+
+    .action-btn-edit:hover {
+        background: #b57c00;
+        color: #fff;
+    }
+
+    .action-btn-delete {
+        color: #c93357;
+        background: rgba(245, 87, 108, 0.12);
+    }
+
+    .action-btn-delete:hover {
+        background: #c93357;
+        color: #fff;
+    }
+
+    .empty-notifications {
+        text-align: center;
+        padding: 4rem 1.5rem;
+        color: var(--lms-muted, #6a6f73);
+    }
+
+    .empty-notifications i {
+        font-size: 3rem;
+        color: #cbd5e1;
+        display: block;
+        margin-bottom: 1rem;
+    }
+</style>
+}
+
+<div class="container py-4">
+
+    @* ── Header Banner ── *@
+    <div class="admin-notifications-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="position-relative">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge rounded-pill bg-white text-dark px-3 py-1 fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                    <i class="bi bi-bell-fill me-1 text-primary"></i> Notification Management
+                </span>
+            </div>
+            <h1>Notifications</h1>
+            <p>Manage announcements and notifications across AI Skills Academy.</p>
+        </div>
+        <div class="position-relative">
+            <a asp-area="Admin" asp-controller="Notifications" asp-action="Create" class="btn-create-notification">
+                <i class="bi bi-plus-lg"></i> Create Notification
+            </a>
+        </div>
+    </div>
+
+    @* ── Search Bar Card ── *@
+    <div class="filter-card">
+        <form method="get" asp-area="Admin" asp-controller="Notifications" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-lg-8 col-md-7">
+                <label for="search" class="form-label small fw-semibold text-muted mb-1">Search Notifications</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="search" name="search" value="@search" class="form-control border-start-0 ps-0" placeholder="Search by recipient, title, or message..." />
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-5 d-flex gap-2">
+                <button type="submit" class="btn btn-filter flex-grow-1">
+                    <i class="bi bi-search me-1"></i> Search
+                </button>
+                @if (!string.IsNullOrWhiteSpace(search) || !string.IsNullOrWhiteSpace(sortBy))
+                {
+                    <a asp-area="Admin" asp-controller="Notifications" asp-action="Index" class="btn btn-reset" title="Clear Search">
+                        <i class="bi bi-x-circle me-1"></i> Reset
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    @* ── Notifications Table Card ── *@
+    <div class="table-card">
+        @if (Model.Items.Any())
+        {
+            <div class="table-responsive">
+                <table class="table notifications-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Recipient</th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Notifications" asp-action="Index"
+                                   asp-route-sortBy="title"
+                                   asp-route-sortDescending="@(sortBy == "title" ? !sortDescending : false)"
+                                   asp-route-search="@search">
+                                    Notification
+                                    @if (sortBy == "title")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Notifications" asp-action="Index"
+                                   asp-route-sortBy="type"
+                                   asp-route-sortDescending="@(sortBy == "type" ? !sortDescending : false)"
+                                   asp-route-search="@search">
+                                    Type
+                                    @if (sortBy == "type")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Notifications" asp-action="Index"
+                                   asp-route-sortBy="isread"
+                                   asp-route-sortDescending="@(sortBy == "isread" ? !sortDescending : false)"
+                                   asp-route-search="@search">
+                                    Status
+                                    @if (sortBy == "isread")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Notifications" asp-action="Index"
+                                   asp-route-sortBy="createdat"
+                                   asp-route-sortDescending="@(sortBy == "createdat" ? !sortDescending : false)"
+                                   asp-route-search="@search">
+                                    Created Date
+                                    @if (sortBy == "createdat")
+                                    {
+                                        <i class="bi bi-arrow-@(sortDescending ? "down" : "up") text-primary"></i>
+                                    }
+                                </a>
+                            </th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var notif in Model.Items)
+                        {
+                            var recipientDisplay = string.IsNullOrWhiteSpace(notif.UserName) ? notif.UserId : notif.UserName;
+                            var initials = string.Concat(
+                                recipientDisplay.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                                .Select(p => p[0].ToString()))
+                                .Take(2);
+                            var avatarText = string.Concat(initials).ToUpper();
+                            if (string.IsNullOrWhiteSpace(avatarText)) avatarText = "U";
+
+                            var colors = new[] { "#5624d0", "#43e97b", "#fa709a", "#4facfe", "#f093fb", "#fc5c7d", "#7c3aed" };
+                            var avatarColor = colors[Math.Abs(notif.UserId.GetHashCode()) % colors.Length];
+
+                            var typeClass = notif.Type switch
+                            {
+                                NotificationType.Assignment => "type-assignment",
+                                NotificationType.Quiz => "type-quiz",
+                                NotificationType.Course => "type-course",
+                                _ => "type-general"
+                            };
+
+                            var typeIcon = notif.Type switch
+                            {
+                                NotificationType.Assignment => "bi-file-earmark-text",
+                                NotificationType.Quiz => "bi-patch-question",
+                                NotificationType.Course => "bi-journal-bookmark",
+                                _ => "bi-info-circle"
+                            };
+
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-initials" style="background: @avatarColor">
+                                            @avatarText
+                                        </div>
+                                        <div>
+                                            <div class="recipient-name-text">@recipientDisplay</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <div class="notification-title-text">@notif.Title</div>
+                                        <div class="notification-message-preview" title="@notif.Message">@notif.Message</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="type-badge @typeClass">
+                                        <i class="bi @typeIcon"></i> @notif.Type
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (notif.IsRead)
+                                    {
+                                        <span class="read-badge read-badge-read">
+                                            <i class="bi bi-check2-all me-1"></i> Read
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="read-badge read-badge-unread">
+                                            <i class="bi bi-dot"></i> Unread
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-muted small">@notif.CreatedAt.ToString("MMM d, yyyy")</span>
+                                </td>
+                                <td>
+                                    <div class="action-btn-group">
+                                        <a asp-area="Admin" asp-controller="Notifications" asp-action="Details" asp-route-id="@notif.Id"
+                                           class="action-btn action-btn-view" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Notifications" asp-action="Edit" asp-route-id="@notif.Id"
+                                           class="action-btn action-btn-edit" title="Edit Notification">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Notifications" asp-action="Delete" asp-route-id="@notif.Id"
+                                           class="action-btn action-btn-delete" title="Delete Notification">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @* Pagination *@
+            <div class="p-3 border-top">
+                <partial name="_Pagination" model="Model" />
+            </div>
+        }
+        else
+        {
+            <div class="empty-notifications">
+                <i class="bi bi-bell-slash"></i>
+                <h5 class="fw-bold text-dark mb-1">No Notifications Found</h5>
+                <p class="text-muted mb-3">No notifications match your current search criteria.</p>
+                <a asp-area="Admin" asp-controller="Notifications" asp-action="Create" class="btn btn-filter px-4">
+                    <i class="bi bi-plus-lg me-1"></i> Create Notification
+                </a>
+            </div>
+        }
+    </div>
+
+</div>

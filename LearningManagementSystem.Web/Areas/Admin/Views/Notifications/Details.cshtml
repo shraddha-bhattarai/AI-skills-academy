@@ -1,0 +1,257 @@
+@model NotificationDto
+@{
+    ViewData["Title"] = "Notification Details";
+    var recipientDisplay = string.IsNullOrWhiteSpace(Model.UserName) ? Model.UserId : Model.UserName;
+
+    var typeClass = Model.Type switch
+    {
+        NotificationType.Assignment => "type-assignment",
+        NotificationType.Quiz => "type-quiz",
+        NotificationType.Course => "type-course",
+        _ => "type-general"
+    };
+
+    var typeIcon = Model.Type switch
+    {
+        NotificationType.Assignment => "bi-file-earmark-text",
+        NotificationType.Quiz => "bi-patch-question",
+        NotificationType.Course => "bi-journal-bookmark",
+        _ => "bi-info-circle"
+    };
+}
+
+@section Styles {
+<style>
+    .details-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c1d95 100%);
+        border-radius: var(--lms-radius, 16px);
+        padding: 2.5rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .details-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 80% 20%, rgba(164, 53, 240, 0.25) 0%, transparent 60%);
+    }
+
+    .details-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        padding: 2rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
+
+    .meta-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid #edf2f7;
+    }
+
+    .meta-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--lms-muted, #6a6f73);
+        margin-bottom: 0.25rem;
+    }
+
+    .meta-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--lms-dark, #1c1d1f);
+    }
+
+    .type-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .type-general {
+        background: rgba(59, 130, 246, 0.12);
+        color: #2563eb;
+    }
+
+    .type-assignment {
+        background: rgba(245, 158, 11, 0.12);
+        color: #d97706;
+    }
+
+    .type-quiz {
+        background: rgba(139, 92, 246, 0.12);
+        color: #7c3aed;
+    }
+
+    .type-course {
+        background: rgba(16, 185, 129, 0.12);
+        color: #059669;
+    }
+
+    .read-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+    }
+
+    .read-badge-unread {
+        background: rgba(86, 36, 208, 0.12);
+        color: var(--lms-primary, #5624d0);
+    }
+
+    .read-badge-read {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .notification-content-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #edf2f7;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--lms-dark, #1c1d1f);
+        white-space: pre-wrap;
+    }
+</style>
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.85rem;">
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Dashboard</a></li>
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Notifications" asp-action="Index" class="text-decoration-none text-muted">Notifications</a></li>
+            <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">Notification #@Model.Id</li>
+        </ol>
+    </nav>
+
+    @* ── Header Hero ── *@
+    <div class="details-hero">
+        <div class="position-relative">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="type-badge @typeClass bg-white">
+                    <i class="bi @typeIcon"></i> @Model.Type
+                </span>
+                @if (Model.IsRead)
+                {
+                    <span class="read-badge read-badge-read bg-white">
+                        <i class="bi bi-check2-all me-1 text-success"></i> Read by Student
+                    </span>
+                }
+                else
+                {
+                    <span class="read-badge read-badge-unread bg-white">
+                        <i class="bi bi-dot text-primary"></i> Unread
+                    </span>
+                }
+            </div>
+            <h1 class="fw-bold mb-2">@Model.Title</h1>
+            <p class="opacity-75 mb-0">
+                Created on @Model.CreatedAt.ToString("MMMM d, yyyy 'at' h:mm tt")
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        @* ── Recipient & Notification Details ── *@
+        <div class="col-lg-8">
+            <div class="details-card mb-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-person-badge-fill text-primary me-2"></i>Recipient Information</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="meta-box">
+                            <div class="meta-label">Recipient Name / Email</div>
+                            <div class="meta-value" style="font-size: 1rem;">@recipientDisplay</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="meta-box">
+                            <div class="meta-label">User ID</div>
+                            <div class="meta-value" style="font-size: 0.88rem; font-family: monospace;">@Model.UserId</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-card">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-chat-left-text-fill text-primary me-2"></i>Notification Content</h5>
+                <div class="mb-3">
+                    <div class="meta-label mb-2">Message</div>
+                    <div class="notification-content-box">
+                        @Model.Message
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* ── Sidebar Meta & Actions ── *@
+        <div class="col-lg-4">
+            <div class="details-card d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle text-primary me-2"></i>Details</h5>
+
+                    <div class="meta-box mb-3">
+                        <div class="meta-label">Notification Type</div>
+                        <div class="meta-value" style="font-size: 1rem;">
+                            <span class="type-badge @typeClass">
+                                <i class="bi @typeIcon"></i> @Model.Type
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="meta-box mb-3">
+                        <div class="meta-label">Status</div>
+                        <div class="meta-value" style="font-size: 1rem;">
+                            @if (Model.IsRead)
+                            {
+                                <span class="read-badge read-badge-read">
+                                    <i class="bi bi-check2-all me-1"></i> Read
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="read-badge read-badge-unread">
+                                    <i class="bi bi-dot"></i> Unread
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="meta-box mb-4">
+                        <div class="meta-label">Sent Date</div>
+                        <div class="meta-value" style="font-size: 0.95rem;">
+                            <i class="bi bi-calendar-event text-primary me-1"></i> @Model.CreatedAt.ToString("MMM d, yyyy")
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-top d-flex flex-column gap-2">
+                    <a asp-area="Admin" asp-controller="Notifications" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary w-100 fw-semibold" style="background: var(--lms-gradient); border: none; border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Notification
+                    </a>
+                    <a asp-area="Admin" asp-controller="Notifications" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100 fw-semibold" style="border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-trash me-1"></i> Delete Notification
+                    </a>
+                    <a asp-area="Admin" asp-controller="Notifications" asp-action="Index" class="btn btn-light w-100 text-muted fw-semibold" style="border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

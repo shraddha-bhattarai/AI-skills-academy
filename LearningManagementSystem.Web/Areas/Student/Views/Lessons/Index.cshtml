@@ -1,0 +1,125 @@
+@model IReadOnlyList<LearningManagementSystem.Application.DTOs.Lessons.StudentLessonDto>
+@{
+    ViewData["Title"] = "Course Lessons";
+    Layout = "_StudentLayout";
+
+    string courseTitle = ViewBag.CourseTitle as string ?? "Course";
+    int courseId = (int)(ViewBag.CourseId ?? 0);
+    int completedCount = Model?.Count(l => l.IsCompleted) ?? 0;
+    int totalCount = Model?.Count ?? 0;
+}
+
+<style>
+    .lessons-hero {
+        background: linear-gradient(135deg, #1a0533 0%, #2d1b69 40%, #5624d0 75%, #7c3aed 100%);
+        border-radius: var(--lms-radius);
+        padding: 2.5rem 2rem;
+        color: #ffffff;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(86, 36, 208, 0.25);
+    }
+    .lesson-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: all 0.25s ease;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .lesson-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(86, 36, 208, 0.12);
+    }
+    .lesson-number {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Courses
+        </a>
+    </div>
+
+    <div class="lessons-hero d-flex flex-wrap justify-content-between align-items-end gap-3">
+        <div>
+            <span class="badge rounded-pill px-3 py-2 mb-3 fw-semibold" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);">
+                <i class="bi bi-journal-text me-1"></i> Course Lessons
+            </span>
+            <h1 class="fw-bold mb-2 text-white">@courseTitle</h1>
+            <p class="mb-0 text-white fs-6" style="opacity: 0.95;">
+                @completedCount of @totalCount lessons completed
+            </p>
+        </div>
+        <a asp-area="Student" asp-controller="Discussions" asp-action="Index" asp-route-courseId="@courseId"
+           class="btn rounded-pill px-4 fw-semibold" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.35);">
+            <i class="bi bi-chat-left-text me-1"></i> Discussions
+        </a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="d-flex flex-column gap-3">
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var lesson = Model[i];
+                <div class="lesson-card">
+                    <div class="lesson-number @(lesson.IsCompleted ? "bg-success-subtle text-success" : "bg-primary-subtle text-primary")">
+                        @if (lesson.IsCompleted)
+                        {
+                            <i class="bi bi-check-lg fs-5"></i>
+                        }
+                        else
+                        {
+                            @(i + 1)
+                        }
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 class="fw-bold text-dark mb-1">@lesson.Title</h5>
+                        <span class="text-muted small">
+                            @if (lesson.IsCompleted)
+                            {
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                <span>Completed</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-circle me-1"></i>
+                                <span>Not started</span>
+                            }
+                        </span>
+                    </div>
+                    <a asp-area="Student" asp-controller="Lessons" asp-action="Details" asp-route-id="@lesson.Id"
+                       class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                        @(lesson.IsCompleted ? "Review" : "Start") <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 rounded-4 shadow-sm py-5 text-center my-4">
+            <div class="card-body">
+                <div class="display-4 text-muted mb-3">
+                    <i class="bi bi-journal-x"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">No Lessons Yet</h4>
+                <p class="text-secondary mb-0" style="max-width: 480px; margin: 0 auto;">
+                    This course does not have any lessons published yet. Check back later.
+                </p>
+            </div>
+        </div>
+    }
+</div>

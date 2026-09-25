@@ -1,0 +1,46 @@
+@model CreateResourceDto
+@{
+    var lesson = ViewBag.Lesson as LessonDto;
+    ViewData["Title"] = "Add Resource";
+}
+
+<div class="container py-4">
+    <h1><i class="bi bi-plus-circle me-2"></i>Add Resource to "@lesson?.Title"</h1>
+    <hr />
+
+    <form asp-area="Admin" asp-controller="Resources" asp-action="Create" method="post">
+        <input type="hidden" asp-for="LessonId" />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="FileUrl" class="form-label"></label>
+            <input asp-for="FileUrl" class="form-control" placeholder="https://..." />
+            <span asp-validation-for="FileUrl" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-check-lg me-1"></i>Add
+            </button>
+            <a asp-area="Admin" asp-controller="Resources" asp-action="Index" asp-route-lessonId="@lesson?.Id" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,12 @@
+@model LearningManagementSystem.Domain.Entities.Quizzes.Quiz
+@{
+    ViewData["Title"] = "Delete Quiz";
+    var hasQuestions = Model.Questions.Any();
+}
+
+<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-8"><div class="card border-0 shadow-sm rounded-4"><div class="card-body p-4 p-md-5">
+    <h1 class="h3 fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Quiz</h1><p class="text-muted">Review this quiz before removing it from the system.</p>
+    @if (hasQuestions) { <div class="alert alert-warning"><i class="bi bi-shield-exclamation me-1"></i>This quiz has @Model.Questions.Count question(s) and cannot be deleted. Remove all questions first to preserve the existing question data safely.</div> } else { <div class="alert alert-danger"><i class="bi bi-exclamation-octagon me-1"></i>This action soft-deletes the quiz. It will no longer be available to students.</div> }
+    <dl class="row bg-light rounded-3 p-3 mx-0"><dt class="col-sm-4">Title</dt><dd class="col-sm-8">@Model.Title</dd><dt class="col-sm-4">Course</dt><dd class="col-sm-8">@Model.Course.Title</dd><dt class="col-sm-4">Total marks</dt><dd class="col-sm-8 mb-0">@Model.TotalMarks points</dd></dl>
+    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex justify-content-end gap-2 mt-4"><a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-light">Cancel</a>@if (!hasQuestions) { <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Confirm Delete</button> }</form>
+</div></div></div></div></div>

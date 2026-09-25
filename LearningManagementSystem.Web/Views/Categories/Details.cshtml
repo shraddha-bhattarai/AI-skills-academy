@@ -1,0 +1,19 @@
+@model CategoryDto
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<section class="course-details-hero">
+    <div class="container">
+        <a class="course-back" asp-area="" asp-controller="Categories" asp-action="Index">← All topics</a>
+        <p class="course-details-eyebrow">AI SKILLS ACADEMY · TOPICS</p>
+        <h1>@Model.Name</h1>
+        <p class="course-details-intro">@(string.IsNullOrWhiteSpace(Model.Description) ? "Explore the courses in this topic." : Model.Description)</p>
+        <p class="course-details-meta">@Model.CourseCount course@(Model.CourseCount == 1 ? "" : "s") in this topic</p>
+    </div>
+</section>
+<section class="container course-details-body">
+    <h2>Find a course</h2>
+    <p>Choose a course in this topic and follow the lessons at your own pace.</p>
+    <a class="btn btn-primary" asp-area="" asp-controller="Courses" asp-action="Index" asp-route-categoryId="@Model.Id">Browse courses in @Model.Name</a>
+</section>

@@ -1,0 +1,159 @@
+@model PagedResult<SubmissionDto>
+@{
+    ViewData["Title"] = "Submissions";
+    var search = ViewBag.Search as string;
+    var status = ViewBag.Status as SubmissionStatus?;
+    var sortBy = ViewBag.SortBy as string;
+    var sortDescending = ViewBag.SortDescending is bool desc && desc;
+}
+
+@section Styles {
+<style>
+    .admin-submissions-header {
+        background: linear-gradient(135deg, #5624d0 0%, #7c3aed 50%, #a435f0 100%);
+        border-radius: var(--lms-radius, 16px);
+        padding: 2.25rem 2rem;
+        color: #fff;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(86, 36, 208, 0.15);
+    }
+    .filter-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        margin-bottom: 1.5rem;
+    }
+    .table-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    .submissions-table thead th {
+        background: #f8fafc;
+        color: var(--lms-muted, #6a6f73);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #edf2f7;
+    }
+    .submissions-table tbody td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.88rem;
+    }
+    .status-badge {
+        border-radius: 50px;
+        padding: 0.3rem 0.85rem;
+        font-weight: 600;
+        font-size: 0.78rem;
+    }
+</style>
+}
+
+<div class="container-fluid py-4">
+    <div class="admin-submissions-header d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+            <span class="badge rounded-pill bg-white text-dark px-3 py-1 fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                <i class="bi bi-inbox-fill me-1 text-primary"></i> Submission Grading
+            </span>
+            <h1 class="fw-bold mt-2 mb-1">Submissions</h1>
+            <p class="mb-0" style="opacity: 0.9;">Review student assignment submissions and record marks, status, and feedback.</p>
+        </div>
+    </div>
+
+    <div class="filter-card">
+        <form method="get" asp-area="Admin" asp-controller="Submissions" asp-action="Index" class="row g-3 align-items-end">
+            <div class="col-lg-6 col-md-6">
+                <label for="search" class="form-label small fw-semibold text-muted mb-1">Search</label>
+                <input type="text" id="search" name="search" value="@search" class="form-control" placeholder="Search by student, assignment, or file path..." />
+            </div>
+            <div class="col-lg-3 col-md-3">
+                <label for="status" class="form-label small fw-semibold text-muted mb-1">Status</label>
+                <select id="status" name="status" class="form-select" asp-items="Html.GetEnumSelectList<SubmissionStatus>()">
+                    <option value="">All Statuses</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1">
+                    <i class="bi bi-search me-1"></i> Filter
+                </button>
+                @if (!string.IsNullOrWhiteSpace(search) || status.HasValue)
+                {
+                    <a asp-area="Admin" asp-controller="Submissions" asp-action="Index" class="btn btn-outline-secondary" title="Clear Filters">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="table-card">
+        @if (Model.Items.Any())
+        {
+            <div class="table-responsive">
+                <table class="table submissions-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Assignment</th>
+                            <th>Marks</th>
+                            <th>Status</th>
+                            <th>
+                                <a asp-area="Admin" asp-controller="Submissions" asp-action="Index"
+                                   asp-route-sortBy="createdat"
+                                   asp-route-sortDescending="@(sortBy == "createdat" ? !sortDescending : false)"
+                                   asp-route-search="@search" asp-route-status="@status"
+                                   class="text-dark text-decoration-none">
+                                    Submitted @(sortBy == "createdat" ? (sortDescending ? "▼" : "▲") : "")
+                                </a>
+                            </th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            var badgeClass = item.Status switch
+                            {
+                                SubmissionStatus.Graded => "bg-success-subtle text-success border border-success-subtle",
+                                SubmissionStatus.Submitted => "bg-info-subtle text-info-emphasis border border-info-subtle",
+                                _ => "bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+                            };
+                            <tr>
+                                <td class="fw-semibold text-dark">@item.StudentName</td>
+                                <td>@item.AssignmentTitle</td>
+                                <td>@(item.Marks?.ToString() ?? "—")</td>
+                                <td><span class="status-badge @badgeClass">@item.Status</span></td>
+                                <td class="text-muted small">@item.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
+                                <td class="text-end">
+                                    <a asp-area="Admin" asp-controller="Submissions" asp-action="Details" asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <i class="bi bi-eye me-1"></i> Review
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-3 border-top">
+                <partial name="_Pagination" model="Model" />
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+                <h5 class="fw-bold text-dark mb-1">No Submissions Found</h5>
+                <p class="text-muted mb-0">No submissions match your current filters.</p>
+            </div>
+        }
+    </div>
+</div>

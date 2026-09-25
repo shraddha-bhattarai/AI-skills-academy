@@ -1,0 +1,224 @@
+@model CourseDto
+@{
+    ViewData["Title"] = $"{Model.Title} - Course Details";
+    var levelClass = Model.Level == CourseLevel.Beginner ? "level-beginner"
+                   : Model.Level == CourseLevel.Intermediate ? "level-intermediate"
+                   : "level-advanced";
+
+    var statusClass = Model.Status == CourseStatus.Published ? "status-published"
+                    : Model.Status == CourseStatus.Draft ? "status-draft"
+                    : "status-archived";
+}
+
+@section Styles {
+<style>
+    .details-hero {
+        background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #4c1d95 100%);
+        border-radius: var(--lms-radius, 16px);
+        padding: 2.5rem 2rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .details-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 80% 20%, rgba(164, 53, 240, 0.25) 0%, transparent 60%);
+    }
+
+    .details-card {
+        background: #fff;
+        border-radius: var(--lms-radius, 16px);
+        padding: 2rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
+
+    .meta-box {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid #edf2f7;
+    }
+
+    .meta-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--lms-muted, #6a6f73);
+        margin-bottom: 0.25rem;
+    }
+
+    .meta-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--lms-dark, #1c1d1f);
+    }
+
+    .level-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+    }
+
+    .level-beginner {
+        background: rgba(67, 233, 123, 0.15);
+        color: #1a9c53;
+    }
+
+    .level-intermediate {
+        background: rgba(250, 173, 20, 0.15);
+        color: #b57c00;
+    }
+
+    .level-advanced {
+        background: rgba(245, 87, 108, 0.15);
+        color: #c93357;
+    }
+
+    .status-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+    }
+
+    .status-published {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .status-draft {
+        background: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+    }
+
+    .status-archived {
+        background: rgba(107, 114, 128, 0.15);
+        color: #4b5563;
+    }
+
+    .badge-category {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        backdrop-filter: blur(6px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .course-banner-img {
+        width: 100%;
+        max-height: 280px;
+        border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+</style>
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb" style="font-size: 0.85rem;">
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted">Dashboard</a></li>
+            <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="text-decoration-none text-muted">Courses</a></li>
+            <li class="breadcrumb-item active text-primary fw-semibold" aria-current="page">@Model.Title</li>
+        </ol>
+    </nav>
+
+    @* ── Header Hero ── *@
+    <div class="details-hero">
+        <div class="position-relative">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                <span class="badge-category"><i class="bi bi-tag-fill me-1"></i> @Model.CategoryName</span>
+                <span class="level-badge @levelClass bg-white"><i class="bi bi-bar-chart-fill me-1"></i> @Model.Level</span>
+                <span class="status-badge @statusClass bg-white"><i class="bi bi-dot"></i> @Model.Status</span>
+            </div>
+            <h1 class="fw-bold mb-2">@Model.Title</h1>
+            <p class="opacity-75 mb-0" style="max-width: 700px;">
+                Created on @Model.CreatedAt.ToString("MMMM d, yyyy 'at' h:mm tt")
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        @* ── Main Content / Description ── *@
+        <div class="col-lg-8">
+            <div class="details-card">
+                <h4 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle-fill text-primary me-2"></i>Course Description</h4>
+                <div class="text-muted" style="line-height: 1.8; font-size: 0.95rem; white-space: pre-line;">
+                    @Model.Description
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ThumbnailUrl))
+                {
+                    <div class="mt-4 pt-3 border-top">
+                        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-image-fill text-primary me-2"></i>Thumbnail Preview</h5>
+                        <img src="@Model.ThumbnailUrl" alt="@Model.Title" class="course-banner-img"
+                             onerror="this.style.display='none';" />
+                    </div>
+                }
+            </div>
+        </div>
+
+        @* ── Sidebar Details & Actions ── *@
+        <div class="col-lg-4">
+            <div class="details-card d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="fw-bold text-dark mb-3"><i class="bi bi-clipboard2-data-fill text-primary me-2"></i>Course Overview</h5>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="meta-box">
+                                <div class="meta-label">Price</div>
+                                <div class="meta-value text-primary">@(Model.Price == 0 ? "Free" : Model.Price.ToString("C"))</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="meta-box">
+                                <div class="meta-label">Status</div>
+                                <div class="meta-value" style="font-size: 0.95rem;">@Model.Status</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="meta-box">
+                                <div class="meta-label">Level</div>
+                                <div class="meta-value" style="font-size: 0.95rem;">@Model.Level</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="meta-box">
+                                <div class="meta-label">Category</div>
+                                <div class="meta-value" style="font-size: 0.95rem;">@Model.CategoryName</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-top d-flex flex-column gap-2">
+                    <a asp-area="Admin" asp-controller="Courses" asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary w-100 fw-semibold" style="background: var(--lms-gradient); border: none; border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Course
+                    </a>
+                    <a asp-area="Admin" asp-controller="Courses" asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100 fw-semibold" style="border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-trash me-1"></i> Delete Course
+                    </a>
+                    <a asp-area="Admin" asp-controller="Courses" asp-action="Index" class="btn btn-light w-100 text-muted fw-semibold" style="border-radius: 10px; padding: 0.65rem;">
+                        <i class="bi bi-arrow-left me-1"></i> Back to Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

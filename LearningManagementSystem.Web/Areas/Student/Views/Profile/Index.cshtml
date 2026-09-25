@@ -1,0 +1,105 @@
+@model LearningManagementSystem.Web.Areas.Student.ViewModels.StudentProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "_StudentLayout";
+}
+
+<style>
+    .profile-hero {
+        background: linear-gradient(135deg, #1a0533 0%, #2d1b69 40%, #5624d0 75%, #7c3aed 100%);
+        border-radius: var(--lms-radius);
+        padding: 2.5rem 2rem;
+        color: #ffffff;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(86, 36, 208, 0.25);
+    }
+    .profile-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(86, 36, 208, 0.1);
+        padding: 2rem;
+    }
+    .profile-picture-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid rgba(86, 36, 208, 0.1);
+        background: #f3f4f6;
+    }
+</style>
+
+<div class="container py-4">
+    <div class="profile-hero">
+        <span class="badge rounded-pill px-3 py-2 mb-3 fw-semibold" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);">
+            <i class="bi bi-person-circle me-1"></i> Account Settings
+        </span>
+        <h1 class="fw-bold mb-2 text-white">My Profile</h1>
+        <p class="mb-0 text-white fs-6" style="opacity: 0.95;">Update your personal information and profile picture.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="profile-card">
+                <div class="text-center mb-4">
+                    @if (!string.IsNullOrWhiteSpace(Model.ProfilePicture))
+                    {
+                        <img src="@Model.ProfilePicture" alt="Profile picture" class="profile-picture-preview" />
+                    }
+                    else
+                    {
+                        <div class="profile-picture-preview d-inline-flex align-items-center justify-content-center text-muted">
+                            <i class="bi bi-person-fill" style="font-size: 3rem;"></i>
+                        </div>
+                    }
+                </div>
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert" style="display:none"></div>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form asp-area="Student" asp-controller="Profile" asp-action="Index" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark small">Email</label>
+                        <input type="text" class="form-control" value="@Model.Email" disabled readonly />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="FirstName" class="form-label fw-semibold text-dark small"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="LastName" class="form-label fw-semibold text-dark small"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-dark small">Profile Picture</label>
+                        <input type="file" name="profilePictureFile" class="form-control" accept="image/*" />
+                        <div class="form-text small">Upload a JPG or PNG image. Leave blank to keep your current picture.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-gradient px-4 py-2 fw-semibold">
+                        <i class="bi bi-check-lg me-1"></i> Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

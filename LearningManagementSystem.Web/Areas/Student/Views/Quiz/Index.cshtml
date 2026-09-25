@@ -1,0 +1,233 @@
+@model IEnumerable<LearningManagementSystem.Web.Areas.Student.ViewModels.StudentQuizItemViewModel>
+@{
+    ViewData["Title"] = "Quizzes - AI Skills Academy Student Portal";
+    Layout = "_StudentLayout";
+    string search = ViewBag.Search as string ?? "";
+    int totalQuizzes = Model?.Count() ?? 0;
+    int totalQuestions = Model?.Sum(q => q.QuestionCount) ?? 0;
+}
+
+<style>
+    .quiz-hero {
+        background: linear-gradient(135deg, var(--lms-primary-dark) 0%, var(--lms-primary) 50%, var(--lms-secondary) 100%);
+        border-radius: 20px;
+        padding: 2.5rem 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(86, 36, 208, 0.2);
+    }
+    .stat-card-custom {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        border: 1px solid rgba(86, 36, 208, 0.08);
+    }
+    .stat-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+    .quiz-card {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(86, 36, 208, 0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        transition: all 0.25s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .quiz-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(86, 36, 208, 0.12);
+        border-color: rgba(86, 36, 208, 0.25);
+    }
+    .quiz-card-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+    .quiz-card-footer {
+        padding: 1rem 1.5rem;
+        background-color: #fafafa;
+        border-top: 1px solid #f0f0f0;
+    }
+    .course-badge {
+        background: rgba(86, 36, 208, 0.08);
+        color: var(--lms-primary-dark);
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Hero Banner -->
+    <div class="quiz-hero">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-2 mb-3 fw-semibold">
+                    <i class="bi bi-patch-question me-1"></i> Interactive Assessments
+                </span>
+                <h1 class="fw-bold mb-2 text-white">Course Quizzes</h1>
+                <p class="mb-0 text-white opacity-90 fs-6">
+                    Test your knowledge, review course topics, and validate your learning progress.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <div class="d-inline-flex align-items-center bg-white bg-opacity-10 rounded-4 p-3 backdrop-blur mb-3">
+                    <i class="bi bi-award fs-1 text-white me-3"></i>
+                    <div class="text-start">
+                        <div class="fs-4 fw-bold text-white mb-0">@totalQuizzes</div>
+                        <small class="text-white opacity-75 fw-medium">Available Quizzes</small>
+                    </div>
+                </div>
+                <div>
+                    <a asp-area="Student" asp-controller="Quiz" asp-action="History" class="btn btn-outline-light rounded-pill px-4 fw-semibold">
+                        <i class="bi bi-clock-history me-1"></i> My Quiz Results
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-journal-check"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@totalQuizzes</h4>
+                    <span class="text-muted small fw-medium">Total Quizzes</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-question-circle"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">@totalQuestions</h4>
+                    <span class="text-muted small fw-medium">Total Questions</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="stat-card-custom d-flex align-items-center gap-3">
+                <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-clock"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-dark">Timed</h4>
+                    <span class="text-muted small fw-medium">Auto-Graded Quizzes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="bg-white rounded-4 p-3 mb-4 shadow-sm border border-light">
+        <form method="get" asp-area="Student" asp-controller="Quiz" asp-action="Index" class="d-flex gap-2">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 rounded-start-pill ps-3 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" name="search" value="@search" class="form-control bg-light border-start-0 rounded-end-pill" placeholder="Search quiz by title or course name..." />
+            </div>
+            <button type="submit" class="btn btn-primary rounded-pill px-4">Search</button>
+            @if (!string.IsNullOrWhiteSpace(search))
+            {
+                <a asp-area="Student" asp-controller="Quiz" asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+                    Clear
+                </a>
+            }
+        </form>
+    </div>
+
+    <!-- Quiz Cards Grid -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var quiz in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="quiz-card">
+                        <div class="quiz-card-body">
+                            <div class="mb-2">
+                                <span class="course-badge text-truncate d-inline-block" style="max-width: 100%;" title="@quiz.CourseTitle">
+                                    <i class="bi bi-book me-1"></i> @quiz.CourseTitle
+                                </span>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-3">@quiz.Title</h5>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="p-2 rounded-3 bg-light text-center">
+                                        <small class="text-muted d-block">Questions</small>
+                                        <strong class="text-dark"><i class="bi bi-list-task me-1 text-primary"></i>@quiz.QuestionCount</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-2 rounded-3 bg-light text-center">
+                                        <small class="text-muted d-block">Total Marks</small>
+                                        <strong class="text-dark"><i class="bi bi-award me-1 text-success"></i>@quiz.TotalMarks pts</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quiz-card-footer d-flex align-items-center justify-content-between">
+                            <span class="small text-muted">
+                                <i class="bi bi-stopwatch text-warning me-1"></i> ~@quiz.EstimatedDurationMinutes mins
+                            </span>
+                            <a asp-area="Student" asp-controller="Quiz" asp-action="Details" asp-route-id="@quiz.QuizId"
+                               class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                View Details <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 rounded-4 shadow-sm py-5 text-center my-4">
+            <div class="card-body">
+                <div class="display-4 text-muted mb-3">
+                    <i class="bi bi-patch-question-fill"></i>
+                </div>
+                <h4 class="fw-bold text-dark mb-2">No Quizzes Available</h4>
+                <p class="text-secondary mb-4" style="max-width: 480px; margin: 0 auto;">
+                    @if (!string.IsNullOrWhiteSpace(search))
+                    {
+                        <span>No quizzes match your search criteria. Try clearing your search input.</span>
+                    }
+                    else
+                    {
+                        <span>There are currently no quizzes assigned in your enrolled courses. Check back later or explore more courses.</span>
+                    }
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    @if (!string.IsNullOrWhiteSpace(search))
+                    {
+                        <a asp-area="Student" asp-controller="Quiz" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
+                            Clear Search
+                        </a>
+                    }
+                    <a asp-area="Student" asp-controller="Courses" asp-action="Index" class="btn btn-primary rounded-pill px-4">
+                        My Courses <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
