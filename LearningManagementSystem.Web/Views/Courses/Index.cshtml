@@ -296,6 +296,14 @@
 <section class="search-section">
     <div class="container">
         <form class="search-box" id="courseSearchForm" method="get" asp-area="" asp-controller="Courses" asp-action="Index" role="search">
+            @if (categoryId.HasValue)
+{
+    <input type="hidden" name="categoryId" value="@categoryId.Value" />
+}
+@if (level.HasValue)
+{
+    <input type="hidden" name="level" value="@level.Value" />
+}
             <input type="search" id="searchQuery" name="search" value="@search" placeholder="Search courses" aria-label="Search courses" />
             <button type="submit" class="btn-search">
                 <i class="bi bi-search me-2"></i>Search
