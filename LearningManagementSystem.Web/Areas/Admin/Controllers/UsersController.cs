@@ -21,7 +21,8 @@ public class UsersController : Controller
     }
 
     public async Task<IActionResult> Index(string? search, int page = 1)
-    {
+    { 
+        page = Math.Max(1, page);
         var query = _userManager.Users.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
