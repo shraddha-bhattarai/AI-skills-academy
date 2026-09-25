@@ -145,36 +145,42 @@
 </div>
 
 @section Scripts {
-    <script>
-        (function() {
-            var timeRemaining = @totalSeconds;
-            var timerDisplay = document.getElementById("countdownTimer");
-            var quizForm = document.getElementById("quizForm");
+   <script>
+    (function () {
+        const quizForm = document.getElementById("quizForm");
+        const timerDisplay = document.getElementById("countdownTimer");
+        const storageKey = "quizDeadline_@Model.QuizId";
 
-            function updateTimer() {
-                var minutes = Math.floor(timeRemaining / 60);
-                var seconds = timeRemaining % 60;
+        let deadline = Number(sessionStorage.getItem(storageKey));
 
-                var formattedMin = minutes < 10 ? "0" + minutes : minutes;
-                var formattedSec = seconds < 10 ? "0" + seconds : seconds;
+        if (!deadline) {
+            deadline = Date.now() + (@totalSeconds * 1000);
+            sessionStorage.setItem(storageKey, deadline);
+        }
 
-                if (timerDisplay) {
-                    timerDisplay.textContent = formattedMin + ":" + formattedSec;
-                }
+        const interval = setInterval(updateTimer, 1000);
+        updateTimer();
 
-                if (timeRemaining <= 0) {
-                    clearInterval(interval);
-                    alert("Time is up! Your quiz answers will be submitted automatically.");
-                    if (quizForm) {
-                        quizForm.submit();
-                    }
-                } else {
-                    timeRemaining--;
-                }
+        function updateTimer() {
+            const secondsLeft = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+            const minutes = Math.floor(secondsLeft / 60);
+            const seconds = secondsLeft % 60;
+
+            timerDisplay.textContent =
+                String(minutes).padStart(2, "0") + ":" +
+                String(seconds).padStart(2, "0");
+
+            if (secondsLeft === 0) {
+                clearInterval(interval);
+                sessionStorage.removeItem(storageKey);
+                alert("Time is up! Your quiz answers will be submitted automatically.");
+                quizForm.submit();
             }
+        }
 
-            updateTimer();
-            var interval = setInterval(updateTimer, 1000);
-        })();
-    </script>
+        quizForm.addEventListener("submit", function () {
+            sessionStorage.removeItem(storageKey);
+        });
+    })();
+</script>
 }
